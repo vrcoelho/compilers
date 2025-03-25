@@ -33,8 +33,6 @@ int get_line_number(void);
   */
 %option yylineno
 
-  /* Definição de quais são os caracteres especiais */
-ESPECIAL [!*/%+-<>[]()=,;&|]
 
 
 %%
@@ -73,7 +71,7 @@ ESPECIAL [!*/%+-<>[]()=,;&|]
  /* "bool"       return TK_PR_BOOL; (não precisa ter de acordo com a definição)
 
  /* (2) -> Caracteres especiais */
-{ESPECIAL}   return yytext[0];
+[!*%+-<>=&]|[\(\)\[\]\|]   return yytext[0];
 
   /* (3) -> Operadores compostos */
 "<="         return TK_OC_LE;
