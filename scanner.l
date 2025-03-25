@@ -36,12 +36,6 @@ int get_line_number(void);
   /* Definição de quais são os caracteres especiais */
 ESPECIAL [!*/%+-<>[]()=,;&|]
 
-  /*
-  ** Definição da Start Condition `MULTILINE_COMMENT` usada para processar comentários multilinhas.
-  **
-  ** Referência: https://www.cs.princeton.edu/~appel/modern/c/software/flex/flex.html#SEC11
-  */
-%x MULTILINE_COMMENT
 
 %%
 
@@ -117,30 +111,6 @@ ESPECIAL [!*/%+-<>[]()=,;&|]
   /* Ignorar comentários single-line. */
 "//".*
 
-  /* 
-  ** Ignorar comentários multi-line. 
-  **
-  ** Ao encontrar `/*`, entra na máquina de estados descrita por `MULTILINE_COMMENT`.
-  ** Dentro deste estado,
-  **    \n          ==> Ignora newlines
-  **    [^*\n]*     ==> Ignora tudo que não for um asterisco ou newline
-  **    "*"+[^/]*   ==> Ignora asteriscos que não estejam diretamente seguidos pela barra
-  **    "*"+"/"     ==> Volta à máquina de estados inicial ao encontrar uma sequência de asteriscos encerrada por uma barra
-  **    <<EOF>>     ==> Retorna TK_ERRO caso o arquivo termine sem ter fechado o comentário
-  */
-
-  //Acredito que não precisa comentario multilinha de acordo com a definição
-"/*"   BEGIN(MULTILINE_COMMENT);
-
-<MULTILINE_COMMENT>{
-
-  \n
-  [^*\n]*           
-  "*"+[^/\n]*       
-  "*"+"/"      BEGIN(INITIAL);
-  <<EOF>>      return TK_ERRO;
-
-}
 
   /* Qualquer outra coisa: lançar erro */
 .       return TK_ER;
