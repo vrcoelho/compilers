@@ -82,8 +82,8 @@ int get_line_number(void);
 "|"          return TK_OC_OR; (não precisa)*/
 
   /* (5) -> Literais */
-[0-9]+              return TK_LIT_INT;
-[0-9]*\.[0-9]+      return TK_LIT_FLOAT;
+[0-9]+              return TK_LI_INT;
+[0-9]*\.[0-9]+      return TK_LI_FLOAT;
     /* "true"              return TK_LIT_TRUE;    // Declarados aqui acima do (4) para não serem acidentalmente reconhecidos como identificadores!
 "false"             return TK_LIT_FALSE; (NÃO VAI PRECISAR) */   // Declarados aqui acima do (4) para não serem acidentalmente reconhecidos como identificadores!
 
