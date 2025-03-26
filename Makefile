@@ -11,7 +11,7 @@ lex.yy.c: scanner.l
 	flex scanner.l 
 
 clean:
-	-rm *.o lex.yy.c etapa1
+	-rm *.o lex.yy.c etapa1 etapa1.tgz
 
 package:
 	$(MAKE) clean
