@@ -14,5 +14,4 @@ clean:
 	-rm *.o lex.yy.c etapa1 etapa1.tgz
 
 package:
-	$(MAKE) clean
-	tar cvzf ../etapa1.tgz .
+	tar cvzf etapa1.tgz *.c *.h scanner.l Makefile
