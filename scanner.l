@@ -30,9 +30,6 @@ int get_line_number(void);
 "=="         return TK_OC_EQ;
 "!="         return TK_OC_NE;
 
- /* caracteres especiais */
-[!*%+-<>=&]|[\(\)\[\]\|]   return yytext[0];
-
  /* literal float */
 [0-9]*\.[0-9]+      return TK_LI_FLOAT;
 
@@ -41,6 +38,10 @@ int get_line_number(void);
 
  /* identificadores */
 [a-z_][a-z_0-9]*    return TK_ID;
+
+ /* caracteres especiais */
+[!*%+-<>=&]|[\(\)\[\]\|]   return yytext[0];
+
 
 [[:space:]]+   { /* Ignore whitespace */ }
 
