@@ -1,11 +1,12 @@
-etapa1: lex.yy.o main.o
-	gcc -o etapa1 lex.yy.o main.o
+CC=gcc
+DEPS = tokens.h
+OBJ = lex.yy.o main.o
 
-main.o: main.c
-	gcc -c main.c
+%.o: %.c $(DEPS)
+	$(CC) -c -o $@ $<
 
-lex.yy.o: lex.yy.c
-	gcc -c lex.yy.c
+etapa1: $(OBJ)
+	$(CC) -o $@ $^
 
 lex.yy.c: scanner.l
 	flex scanner.l 
