@@ -8,6 +8,11 @@ extern int get_line_number(void);
 
 %define parse.error verbose
 
+%precedence IF_SEM_ELSE
+%precedence IF_COM_ELSE
+
+%precedence MENOS_UNARIO
+
 %start programa
 
 /*
@@ -35,12 +40,9 @@ extern int get_line_number(void);
 
 %%
 
+
+
 /* 
-%precedence IF_SEM_ELSE
-%precedence IF_COM_ELSE
-
-%precedence MENOS_UNARIO
-
 Um programa na linguagem é composto por uma
 lista opcional de elementos. Os elementos da lista
 são separados pelo operador vírgula e a lista é ter-
@@ -88,13 +90,14 @@ tipo_da_variavel
 NÃO SEI SE TÁ CERTO
 */
 declaracao_da_variavel
-    :  declaracao_da_variavel ';' TK_PR_DECLARE TK_ID TK_PR_AS
-    | TK_PR_DECLARE TK_ID TK_PR_AS
+  //  :  declaracao_da_variavel ';' TK_PR_DECLARE TK_ID TK_PR_AS
+    : TK_PR_DECLARE TK_ID TK_PR_AS
 ;
 
-inicializa_variavel
-        : TK_PR_WITH tipo_da_variavel
-        ;
+//
+//inicializa_variavel
+//        : TK_PR_WITH tipo_da_variavel
+//        ;
 
 
 /* 
@@ -118,11 +121,11 @@ corpo
 ** A lista de parâmetros é dada entre parênteses [...]
 */
 cabecalho
-    : '(' lista_de_parametros_que_pode_ser_vazia ')' TK_OC_OR tipo_de_retorno '/' nome_da_funcao
+    : '(' lista_de_parametros_que_pode_ser_vazia ')' tipo_de_retorno '/' nome_da_funcao
 ;
 
 nome_da_funcao
-    : TK_IDENTIFICADOR
+    : TK_ID
 ;
 
 /*
@@ -190,7 +193,8 @@ sequencia_de_comandos_simples
 */
 comando_simples
     : comando_simples_bloco_de_comandos
-    | comando_simples_declaracao_de_variavel
+//    | comando_simples_declaracao_de_variavel
+    | variavel
     | comando_simples_comando_de_atribuicao
     | comando_simples_chamada_de_funcao
     | comando_simples_comando_de_retorno
@@ -217,25 +221,25 @@ comando_simples_bloco_de_comandos
 ** (identificador) separadas por ponto-e-vírgula.
 ** Os tipos podem ser aqueles descritos na seção
 ** sobre variáveis globais.
-*/
-comando_simples_declaracao_de_variavel
-    : tipo_da_variavel_local lista_de_variaveis_locais
-;
-
-tipo_da_variavel_local
-    : tipo_da_variavel_global
-;
-
-lista_de_variaveis_locais
-    : TK_IDENTIFICADOR
-    | lista_de_variaveis_locais_separadas_por_ponto_e_virgula TK_IDENTIFICADOR
-;
-
-lista_de_variaveis_locais_separadas_por_ponto_e_virgula
-    : TK_IDENTIFICADOR ';'
-    | lista_de_variaveis_locais_separadas_por_ponto_e_virgula TK_IDENTIFICADOR ';'
-;
-
+//*/
+//comando_simples_declaracao_de_variavel
+//    : tipo_da_variavel_local lista_de_variaveis_locais
+//;
+//
+//tipo_da_variavel_local
+//    : tipo_da_variavel_global
+//;
+//
+//lista_de_variaveis_locais
+//    : TK_ID
+//    | lista_de_variaveis_locais_separadas_por_ponto_e_virgula TK_ID
+//;
+//
+//lista_de_variaveis_locais_separadas_por_ponto_e_virgula
+//    : TK_ID ';'
+//    | lista_de_variaveis_locais_separadas_por_ponto_e_virgula TK_ID ';'
+//;
+//
 /*
 ** (C) Comando de atribuição
 **
@@ -243,7 +247,7 @@ lista_de_variaveis_locais_separadas_por_ponto_e_virgula
 ** identificador seguido pelo caractere de
 ** igualdade seguido por uma expressão.
 */
-comando_de_atribuicao
+comando_simples_comando_de_atribuicao
     : TK_ID TK_PR_IS '=' expressao
 ;
 
@@ -254,7 +258,7 @@ comando_de_atribuicao
 ** seguida de argumentos entre parênteses separados
 ** por ponto-e-vírgula. Um argumento pode ser uma expressão.
 */
-chamada_de_funcao
+comando_simples_chamada_de_funcao
     : TK_ID'(' lista_de_argumentos')'
 ;
 
@@ -264,7 +268,7 @@ lista_de_argumentos
     | lista_de_argumentos_separados_por_virgula argumento
 ;
 
-lista_de_argumentos_separados_por__virgula
+lista_de_argumentos_separados_por_virgula
     : argumento ','
     | lista_de_argumentos_separados_por_virgula argumento ','
 ;
@@ -278,7 +282,7 @@ argumento
 **
 ** Trata-se do token return seguido de uma expressão.
 */
-comando_de_retorno
+comando_simples_comando_de_retorno
     : TK_PR_RETURN expressao TK_PR_AS tipo_da_variavel
 ;
 
@@ -357,12 +361,12 @@ construcao_iterativa
 */
 expressao
     : and
-    | expressao TK_OC_OR and
+    | expressao '|' and
 ;
 
 and
     : igual_naoigual
-    | and TK_OC_AND igual_naoigual
+    | and '&' igual_naoigual
 ;
 
 igual_naoigual
@@ -405,8 +409,8 @@ termo
 */
 operando
     : TK_ID
-    | TK_LIT_FLOAT
-    | TK_LIT_INT
+    | TK_LI_FLOAT
+    | TK_LI_INT
     | comando_simples_chamada_de_funcao
 ;
 
