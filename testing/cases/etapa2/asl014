@@ -1,0 +1,6 @@
+//CORRECT
+main returns float is [
+  declare a as int
+  a is a + a
+  return a as int
+];

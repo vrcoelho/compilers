@@ -1,0 +1,4 @@
+//CORRECT
+main returns int is [
+  a is 2 * (c + k)
+];

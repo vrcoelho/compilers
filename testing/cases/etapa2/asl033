@@ -1,0 +1,7 @@
+//CORRECT
+main returns int is [
+  declare a as int
+  declare b as int
+  a is b & a | a & 43
+  return 0 as int
+];

@@ -1,0 +1,4 @@
+//CORRECT
+main returns int is [
+  x is x <= x <= x <= x
+];

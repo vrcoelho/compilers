@@ -1,0 +1,4 @@
+//CORRECT
+main returns int is [
+  if (a) [ x is 2 ] else [ x is 3 ]
+];

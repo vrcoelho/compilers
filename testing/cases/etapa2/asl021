@@ -1,0 +1,4 @@
+//INCORRECT
+main returns int is [
+  f returns int is [];
+];

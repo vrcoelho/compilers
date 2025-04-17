@@ -1,0 +1,4 @@
+//INCORRECT
+main returns int is [
+  declare a as int 4
+];

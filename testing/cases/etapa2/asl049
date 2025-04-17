@@ -1,0 +1,5 @@
+//CORRECT
+main returns float is [
+  return a as float
+];
+

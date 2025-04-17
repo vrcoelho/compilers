@@ -1,0 +1,5 @@
+//INCORRECT
+main returns int is [
+  declare as int
+];
+

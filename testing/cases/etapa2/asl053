@@ -1,0 +1,4 @@
+//CORRECT
+main returns float with argc as int, argv as int, c as float is [
+  return argc as int
+];

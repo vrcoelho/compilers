@@ -1,0 +1,7 @@
+//INCORRECT
+main returns int is [
+  declare a as int
+  declare b as int
+  a = a + b
+  return b as int
+];
