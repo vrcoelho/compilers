@@ -1,4 +1,6 @@
 %{
+/*00219819 - MARIANA KOPPE PIERUCCI
+ 00243463 - VANESSA RIGHI COELHO*/
 #include <stdio.h>
 
 int yylex(void);
@@ -81,9 +83,9 @@ variavel
 ;
 
 variavel_inicializavel
-:
-declaracao_da_variavel
-| declaracao_da_variavel  variavel_inicializavel
+    :
+    declaracao_da_variavel
+    | declaracao_da_variavel  variavel_inicializavel
 ;
 
 declaracao_da_variavel
@@ -99,8 +101,8 @@ tipo_da_variavel
 
 
 variavel_inicializavel
-       : TK_PR_WITH tipo_inicializacao
-       ;
+    : TK_PR_WITH tipo_inicializacao
+    ;
 
 tipo_inicializacao
     : TK_LI_INT
@@ -109,12 +111,12 @@ tipo_inicializacao
 
 // funcoes
 funcao
-:
+    :
     cabecalho corpo
 ;
 
 corpo
-:
+    :
      bloco_de_comandos
 ;
 
