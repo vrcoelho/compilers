@@ -85,7 +85,7 @@ variavel
 variavel_inicializavel
     :
     declaracao_da_variavel
-    | declaracao_da_variavel  variavel_inicializavel
+    | declaracao_da_variavel  variavel_inicializacao
 ;
 
 declaracao_da_variavel
@@ -100,7 +100,7 @@ tipo_da_variavel
 ;
 
 
-variavel_inicializavel
+variavel_inicializacao
     : TK_PR_WITH tipo_inicializacao
     ;
 
