@@ -1,0 +1,4 @@
+//INCORRECT
+main returns int is [
+  a is ((b * 1) + c) or 1
+];

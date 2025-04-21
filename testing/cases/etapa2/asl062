@@ -1,0 +1,4 @@
+//CORRECT
+main returns int with x as int, y as float is [
+  f(x, y)
+];

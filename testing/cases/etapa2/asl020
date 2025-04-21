@@ -1,0 +1,5 @@
+//INCORRECT
+main returns int is [
+  declare x as int
+  x is x + 1 1 * 2
+];

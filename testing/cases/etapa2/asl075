@@ -1,0 +1,4 @@
+//INCORRECT
+main returns int is [
+  [ declara x as int ] while ( 1 )
+];

@@ -1,0 +1,5 @@
+//INCORRECT
+main returns int is [
+  declare a as float
+  a with 3.5
+];

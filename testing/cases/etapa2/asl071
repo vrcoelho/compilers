@@ -1,0 +1,5 @@
+//INCORRECT
+main returns int is [
+{
+  f(3)=f(2)
+}

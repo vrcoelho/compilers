@@ -1,0 +1,2 @@
+//INCORRECT
+declare var as float with 10.2;

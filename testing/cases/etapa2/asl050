@@ -1,0 +1,5 @@
+//CORRECT
+main returns int is [
+  return a as int
+];
+

@@ -1,0 +1,7 @@
+//CORRECT
+main returns int is [
+  declare a as int
+  if (a) [ [] [] ]
+  if (a) [ x is 2 ] else [ x is 3 ]
+];
+

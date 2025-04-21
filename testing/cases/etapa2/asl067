@@ -1,0 +1,6 @@
+//CORRECT
+main returns int is [
+  if (a == 2) [ ]
+  if ((a+b) <= 10) [ ]
+  a is 2 * (c + k)
+];
