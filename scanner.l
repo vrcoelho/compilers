@@ -1,7 +1,8 @@
 %{
  /*00219819 - MARIANA KOPPE PIERUCCI
  00243463 - VANESSA RIGHI COELHO*/
-#include "tokens.h"
+// #include "tokens.h"
+#include "parser.tab.h"
 
 int get_line_number(void);
 
