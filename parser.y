@@ -12,12 +12,6 @@ extern int get_line_number(void);
 
 %define parse.error verbose
 
-
-
-
-%precedence MAIS_UNARIO
-%precedence MENOS_UNARIO
-
 %start programa
 
 /*
@@ -297,8 +291,8 @@ fator
 termo
     : operando
     | '(' expressao ')'
-    | '+' termo %prec MAIS_UNARIO
-    | '-' termo %prec MENOS_UNARIO
+    | '+' termo
+    | '-' termo
     | '!' termo
 ;
 
