@@ -33,3 +33,5 @@ package2:
 # === Etapa 3 ===
 etapa3: parser.tab.o lex.yy.o main.o asd.o
 	gcc -o etapa3 parser.tab.o lex.yy.o main.o asd.o
+	
+all: etapa2
