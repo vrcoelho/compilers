@@ -12,8 +12,7 @@ extern int get_line_number(void);
 
 %define parse.error verbose
 
-%precedence IF_SEM_ELSE
-%precedence IF_COM_ELSE
+
 
 
 %precedence MAIS_UNARIO
@@ -243,10 +242,13 @@ comando_simples_comandos_de_controle_de_fluxo
     | construcao_iterativa
 ;
 
+// isso eh o problema do dangling else
+// TODO review...
+
 // if
 construcao_condicional
-    : TK_PR_IF '(' expressao ')' bloco_de_comandos %prec IF_SEM_ELSE
-    | TK_PR_IF '(' expressao ')' bloco_de_comandos TK_PR_ELSE bloco_de_comandos %prec IF_COM_ELSE
+    : TK_PR_IF '(' expressao ')' bloco_de_comandos 
+    | TK_PR_IF '(' expressao ')' bloco_de_comandos TK_PR_ELSE bloco_de_comandos
 ;
 
 // while
