@@ -316,11 +316,21 @@ void yyerror (char const *s) {
     extern int yylineno;
     extern int yychar;
     extern char *yytext;
+
     extern const char *const yytname[];
 
     if (yychar >= 0)
-        fprintf(stderr, "Erro na linha %d: %s. Token atual: '%s' (%s)\n",
-                yylineno, s, yytext, yytname[yychar]);
+    {
+        fprintf(stderr, "Erro na linha %d: %s. Token atual: '%s'",
+                yylineno, s, yytext);
+
+        if (yychar < (sizeof(yytname) / sizeof(yytname[0])) )
+            fprintf(stderr, " (%s)", 
+            yytname[yychar]);
+
+        printf("\n");
+    }
+
     else
         fprintf(stderr, "Erro na linha %d: %s. Token atual: <EOF or invalid>\n",
                 yylineno, s);
