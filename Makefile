@@ -2,7 +2,7 @@
 	gcc -c $<
 
 parser.tab.c parser.tab.h: parser.y
-	bison -d parser.y
+	bison -d -v --report=all parser.y
 
 lex.yy.c: scanner.l
 	flex scanner.l
