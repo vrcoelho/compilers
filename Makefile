@@ -30,3 +30,5 @@ etapa2: parser.tab.o lex.yy.o main.o
 
 package2:
 	tar cvzf etapa2.tgz etapa2 *.c *.h *.y scanner.l Makefile
+
+all: etapa2
