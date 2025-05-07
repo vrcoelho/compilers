@@ -61,6 +61,15 @@ DEFINICAO DE TOKENS
 %type <node> lista_de_elementos
 %type <node> variavel
 
+%type <node> nome_da_funcao lista_de_parametros_que_pode_ser_vazia
+
+%type <node> lista_wrapper lista_de_parametros
+
+
+%type <node> decl lista_de_argumentos argumento
+
+%type <node> lista_de_argumentos_separados_por_virgula
+
 %%
 
 
@@ -220,11 +229,17 @@ funcao
 
         #endif
 
-        // vamos ignorar completamente o cabecalho
+        $$ = asd_new("func");
+
+
+        // NAO vamos ignorar completamente o cabecalho
+        asd_add_child($$, $1);
+        // temos que adicionar primeiro o cabecalho e depois o corpo
+
+
         // 1. Listas de funções, onde cada função tem 
         // dois filhos, um que é o seu primeiro comando
         //  e outro que é a próxima função;
-        $$ = asd_new("func");
         asd_add_child($$, $2);
 
         // add null child for second element?
@@ -243,11 +258,27 @@ corpo
 cabecalho
     : nome_da_funcao TK_PR_RETURNS tipo_da_variavel
      lista_de_parametros_que_pode_ser_vazia TK_PR_IS
+{
+        #ifdef DEBUG_MESSAGES
+            printf("> cabecalho\n");
+            printf("> nome_da_funcao TK_PR_RETURNS tipo_da_variavel lista_de_parametros_que_pode_ser_vazia TK_PR_IS\n");
+        #endif
 
+        $$ = asd_new("cabecalho is");
+        asd_add_child($$, 
+            $1 // nome da funcao
+        );
+
+        // cuidar que lista_de_parametros_que_pode_ser_vazia
+        // PODE SER VAZIA 
+        // logo checar $4
+        asd_add_child($$, $4);
+
+    }
 ;
 
 nome_da_funcao
-    : TK_ID
+    : TK_ID {$$ = asd_new($1);}
 ;
 
 
@@ -255,12 +286,20 @@ nome_da_funcao
 
 lista_de_parametros_que_pode_ser_vazia
     : %empty
+    {
+        #ifdef DEBUG_MESSAGES
+            printf("> empty\n");
+        #endif
+        $$ = asd_new("parametro empty");
+    }
+
     | lista_wrapper
+    
 ;
 
 lista_wrapper
     :
-    TK_PR_WITH lista_de_parametros
+    TK_PR_WITH lista_de_parametros {$$ = $2;}
 ;
 
 lista_de_parametros
@@ -271,7 +310,19 @@ lista_de_parametros
 
 decl
     :
-    TK_ID TK_PR_AS tipo_de_parametro
+    TK_ID TK_PR_AS tipo_de_parametro {
+        #ifdef DEBUG_MESSAGES
+            printf("> decl\n");
+            printf("> TK_ID TK_PR_AS tipo_de_parametro\n");
+        #endif
+        $$ = asd_new("decl (as)");
+        asd_add_child($$, 
+        asd_new($1)
+        );
+        // TODO CHECK THE TIPO
+        asd_add_child($$, asd_new("tipo"));
+    }
+    
 ;
 
 tipo_de_parametro
@@ -373,7 +424,7 @@ comando_simples_comando_de_atribuicao
             printf("%s\n", $3->label);
         #endif
 
-        $$ = asd_new("is");
+        $$ = asd_new("expressao is");
         asd_add_child($$, 
             asd_new($1)
             // we have to create on the spot. why?
@@ -385,18 +436,53 @@ comando_simples_comando_de_atribuicao
 
 // chamada de funcao
 comando_simples_chamada_de_funcao
-    : TK_ID'(' lista_de_argumentos')'
+    : TK_ID'(' lista_de_argumentos')' {
+        #ifdef DEBUG_MESSAGES
+            printf("> comando_simples_chamada_de_funcao\n");
+            printf("> TK_ID'(' lista_de_argumentos')'\n");
+
+        #endif
+
+        $$ = asd_new("argumentos");
+        asd_add_child($$, 
+            asd_new($1)
+            // we have to create on the spot. why?
+        );
+        asd_add_child($$, $3);
+
+    }
 ;
 
 lista_de_argumentos
     : %empty
+        {
+        #ifdef DEBUG_MESSAGES
+            printf("> empty\n");
+        #endif
+        $$ = asd_new("larg empty");
+    }
     | argumento
-    | lista_de_argumentos_separados_por_virgula argumento
+    | lista_de_argumentos_separados_por_virgula argumento 
+    {
+        #ifdef DEBUG_MESSAGES
+            printf("> lista_de_argumentos_separados_por_virgula argumento\n");
+        #endif
+        $$ = asd_new("list args");
+        asd_add_child($$, $1);
+        asd_add_child($$, $2);
+    }
 ;
 
 lista_de_argumentos_separados_por_virgula
     : argumento ','
-    | lista_de_argumentos_separados_por_virgula argumento ','
+    | lista_de_argumentos_separados_por_virgula argumento ','     {
+        #ifdef DEBUG_MESSAGES
+            printf("> lista_de_argumentos_separados_por_virgula argumento ','\n");
+        #endif
+        $$ = asd_new("list args c virgula");
+        asd_add_child($$, $1);
+        asd_add_child($$, $2);
+    }
 ;
 
 argumento
