@@ -202,7 +202,7 @@ funcao
 
                 printf("> cabecalho corpoaaa\n");
 
-
+                // printf("////> %s\n",$1->label);
 
                 // $$ = $2;
                 if ($2 == NULL)
@@ -328,7 +328,7 @@ sequencia_de_comandos_simples
         #endif
 
         // TODO aqui vou ter que adicionar os filhos, eh isso?
-        $$ = asd_new("seq_c");
+        $$ = asd_new("seq_comandos");
         asd_add_child($$, $1);
         asd_add_child($$, $2);
     }
@@ -430,12 +430,48 @@ comando_simples_comandos_de_controle_de_fluxo
 // if
 construcao_condicional
     : TK_PR_IF '(' expressao ')' bloco_de_comandos 
+{
+        #ifdef DEBUG_MESSAGES
+            printf("> if simples \n");
+            printf("> TK_PR_IF '(' expressao ')' bloco_de_comandos \n");
+
+        #endif
+
+        $$ = asd_new("if simples");
+        asd_add_child($$, $3);
+        asd_add_child($$, $5);
+
+    }
+
+
     | TK_PR_IF '(' expressao ')' bloco_de_comandos TK_PR_ELSE bloco_de_comandos
+    {
+        #ifdef DEBUG_MESSAGES
+            printf("> if com else \n");
+            printf("> TK_PR_IF '(' expressao ')' bloco_de_comandos TK_PR_ELSE bloco_de_comandos \n");
+        #endif
+
+        $$ = asd_new("if c else");
+        asd_add_child($$, $3);
+        asd_add_child($$, $5);
+        asd_add_child($$, $7);
+    }
+
 ;
 
 // while
 construcao_iterativa
-    : TK_PR_WHILE '(' expressao ')' bloco_de_comandos
+    : TK_PR_WHILE '(' expressao ')' bloco_de_comandos {
+        #ifdef DEBUG_MESSAGES
+            printf("> TK_PR_WHILE '(' expressao ')' bloco_de_comandos\n");
+
+        #endif
+
+        $$ = asd_new("while");
+        asd_add_child($$, $3);
+        asd_add_child($$, $5);
+
+    }
 ;
 
 
@@ -462,7 +498,18 @@ and
 igual_naoigual
     : maior_menor
     | igual_naoigual TK_OC_NE maior_menor
-    | igual_naoigual TK_OC_EQ maior_menor
+    | igual_naoigual TK_OC_EQ maior_menor {
+        #ifdef DEBUG_MESSAGES
+            printf("> igual_naoigual TK_OC_EQ maior_menor\n");
+            printf("%s\n", $3->label);
+        #endif
+
+        $$ = asd_new("==");
+        asd_add_child($$, 
+            $1
+        );
+        asd_add_child($$, $3);
+    }
 ;
 
 maior_menor
