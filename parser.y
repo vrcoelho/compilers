@@ -2,10 +2,18 @@
 /*00219819 - MARIANA KOPPE PIERUCCI
  00243463 - VANESSA RIGHI COELHO*/
 #include <stdio.h>
+#include "asd.h"
 
 int yylex(void);
 void yyerror (char const *mensagem);
 extern int get_line_number(void);
+extern asd_tree_t *arvore;
+
+struct svalor_lexico {
+  int line_number;
+  char *token_type;
+  char *value;
+  };
 %}
 
 %debug
@@ -13,6 +21,13 @@ extern int get_line_number(void);
 %define parse.error verbose
 
 %start programa
+
+%union {
+  int intval;
+  struct asd_tree* node;
+  char * value;
+//   struct svalor_lexico valor_lexico;
+}
 
 /*
 DEFINICAO DE TOKENS
@@ -32,10 +47,19 @@ DEFINICAO DE TOKENS
 %token TK_OC_GE
 %token TK_OC_EQ
 %token TK_OC_NE
-%token TK_ID
-%token TK_LI_INT
-%token TK_LI_FLOAT
+%token <value>TK_ID TK_LI_INT TK_LI_FLOAT
 %token TK_ER
+
+// non terminals
+
+%type <node> operando and igual_naoigual lista_de_elementos_wrapper
+%type <node> comando_simples_chamada_de_funcao maior_menor acumulacao fator termo expressao
+%type <node> comando_simples_comando_de_atribuicao sequencia_de_comandos_simples comando_simples variavel_inicializavel comando_simples_comandos_de_controle_de_fluxo declaracao_da_variavel
+%type <node> comando_simples_comando_de_retorno bloco_de_comandos comando_simples_bloco_de_comandos construcao_condicional construcao_iterativa
+%type <node> funcao cabecalho corpo
+%type <node> sequencia_de_comandos_simples_possivelmente_vazia
+%type <node> lista_de_elementos
+%type <node> variavel
 
 %%
 
@@ -51,20 +75,69 @@ DEFINICAO DE TOKENS
 programa
     :
     %empty
-    | lista_de_elementos_wrapper   
+    | lista_de_elementos_wrapper  {
+        
+
+        #ifdef DEBUG_MESSAGES
+            printf("> lista_de_elementos_wrapper\n");
+
+            if ($1 == NULL)
+                printf("> eh nulo\n");
+            else
+                printf("%s\n", $1->label);
+        #endif
+
+        // aqui eu quero retornar a arvore
+        arvore = $1;
+
+        } 
 ;
 
 lista_de_elementos_wrapper
     :
-    lista_de_elementos   ';'   
+    lista_de_elementos   ';'   {
+        #ifdef DEBUG_MESSAGES
+            printf("> lista_de_elementos ';'\n");
+        #endif
+
+        $$ = $1;
+        } 
 ;
 
 lista_de_elementos
-    : 
-    variavel
-    | funcao
-    | lista_de_elementos ',' variavel
-    | lista_de_elementos ',' funcao
+    :
+    
+    variavel    {
+        #ifdef DEBUG_MESSAGES
+            printf("> variavel\n");
+        #endif
+        } 
+    | funcao    {
+        #ifdef DEBUG_MESSAGES
+            printf("> funcao\n");
+        #endif
+
+         $$ = $1;
+        } 
+    | lista_de_elementos ',' variavel   {
+        #ifdef DEBUG_MESSAGES
+            printf("> lista_de_elementos ',' variavel\n");
+        #endif
+
+
+        $$ = asd_new("l,v");
+        asd_add_child($$, $1);
+        asd_add_child($$, $3);
+
+        } 
+    | lista_de_elementos ',' funcao     {
+        #ifdef DEBUG_MESSAGES
+            printf("> lista_de_elementos ',' funcao\n");
+        #endif
+        $$ = asd_new("l,f");
+        asd_add_child($$, $1);
+        asd_add_child($$, $3);
+        } 
    
 ;
 
@@ -77,6 +150,7 @@ variavel
 
 variavel_inicializavel
     :
+    
     declaracao_da_variavel
     | declaracao_da_variavel  variavel_inicializacao
 ;
@@ -84,6 +158,22 @@ variavel_inicializavel
 declaracao_da_variavel
     :
      TK_PR_DECLARE TK_ID TK_PR_AS tipo_da_variavel
+     {
+        // O comando de atribuição deve ter 
+        // pelo menos dois filhos, um que é 
+        // o identificador e outro que é o 
+        // valor da expressão
+        $$ = asd_new("as");
+
+        asd_add_child($$, 
+            asd_new($2)
+        );
+
+        // TODO ADD SECOND CHILD
+        // SHOULD BE THE TYPE
+
+
+     }
 ;
 
 
@@ -105,7 +195,43 @@ tipo_inicializacao
 // funcoes
 funcao
     :
-    cabecalho corpo
+    cabecalho corpo {
+
+        // todo fix these errors
+        #ifdef DEBUG_MESSAGES
+
+                printf("> cabecalho corpoaaa\n");
+
+
+
+                // $$ = $2;
+                if ($2 == NULL)
+                fprintf(stderr, "lNULLNULLNULLNULL\n");
+                
+
+                // o corpo pode ser vazio! cuidado
+                if ($2->label == NULL)
+                {
+        printf("> ererwrw\n");
+                    fprintf(stderr, "lNULLNULLNULLNULL\n");
+                
+                
+                }
+
+        #endif
+
+        // vamos ignorar completamente o cabecalho
+        // 1. Listas de funções, onde cada função tem 
+        // dois filhos, um que é o seu primeiro comando
+        //  e outro que é a próxima função;
+        $$ = asd_new("func");
+        asd_add_child($$, $2);
+
+        // add null child for second element?
+        // asd_add_child($$, NULL);
+
+
+    }
 ;
 
 corpo
@@ -156,7 +282,14 @@ tipo_de_parametro
 // bloco de comandos
 bloco_de_comandos
     : 
-    '[' sequencia_de_comandos_simples_possivelmente_vazia ']'
+    '[' sequencia_de_comandos_simples_possivelmente_vazia ']'  {
+        #ifdef DEBUG_MESSAGES
+            printf("> '[' sequencia_de_comandos_simples_possivelmente_vazia ']'\n");
+        #endif
+
+
+        $$ = $2;
+    }
 
 ;
 
@@ -164,12 +297,41 @@ bloco_de_comandos
 
 sequencia_de_comandos_simples_possivelmente_vazia
     : %empty
-    | sequencia_de_comandos_simples
+    {
+        #ifdef DEBUG_MESSAGES
+            printf("> empty\n");
+        #endif
+        $$ = asd_new("c empty");
+    }
+
+    | sequencia_de_comandos_simples {
+        #ifdef DEBUG_MESSAGES
+            printf("> sequencia_de_comandos_simples\n");
+        #endif
+        $$ = $1;
+    }
 ;
 
 sequencia_de_comandos_simples
-    : comando_simples 
-    | sequencia_de_comandos_simples comando_simples 
+    : comando_simples {
+        #ifdef DEBUG_MESSAGES
+            printf("> comando_simples\n");
+            printf("%s\n", $1->label);
+        #endif
+        $$ = $1;
+
+    }
+    | sequencia_de_comandos_simples comando_simples  {
+        #ifdef DEBUG_MESSAGES
+            printf("> sequencia_de_comandos_simples comando_simples\n");
+            printf("%s\n", $1->label);
+        #endif
+
+        // TODO aqui vou ter que adicionar os filhos, eh isso?
+        $$ = asd_new("seq_c");
+        asd_add_child($$, $1);
+        asd_add_child($$, $2);
+    }
 ;
 
 
@@ -202,7 +364,23 @@ comando_simples_bloco_de_comandos
 ;
 
 comando_simples_comando_de_atribuicao
-    : TK_ID TK_PR_IS expressao
+    : TK_ID TK_PR_IS expressao 
+    {
+        #ifdef DEBUG_MESSAGES
+            printf("> TK_ID TK_PR_IS expressao\n");
+
+            printf("%s\n", $1);
+            printf("%s\n", $3->label);
+        #endif
+
+        $$ = asd_new("is");
+        asd_add_child($$, 
+            asd_new($1)
+            // we have to create on the spot. why?
+        );
+        asd_add_child($$, $3);
+
+    }
 ;
 
 // chamada de funcao
@@ -227,7 +405,17 @@ argumento
 
 // retorno
 comando_simples_comando_de_retorno
-    : TK_PR_RETURN expressao TK_PR_AS tipo_da_variavel
+    : TK_PR_RETURN expressao TK_PR_AS tipo_da_variavel {
+        #ifdef DEBUG_MESSAGES
+            printf("> TK_PR_RETURN expressao TK_PR_AS tipo_da_variavel\n");
+        #endif
+        $$ = asd_new("return");
+        asd_add_child($$, $2);
+
+        // TODO WHAT ELSE DO I NEED TO ADD HERE?
+
+
+    }
 ;
 
 // controle de fluxo
@@ -258,7 +446,17 @@ expressao
 
 and
     : igual_naoigual
-    | and '&' igual_naoigual
+    | and '&' igual_naoigual {
+        #ifdef DEBUG_MESSAGES
+            printf("> chegou no &\n");
+            printf("%s\n", $1->label);
+            printf("%s\n", $3->label);
+        #endif
+
+        $$ = asd_new("a & b");
+        asd_add_child($$, $1);
+        asd_add_child($$, $3);
+    }
 ;
 
 igual_naoigual
@@ -290,10 +488,49 @@ fator
 
 termo
     : operando
-    | '(' expressao ')'
+    | '(' expressao ')' {
+        #ifdef DEBUG_MESSAGES
+            printf("> chegou no '(' expressao ')'\n");
+            printf("%s\n", $2->label);
+        #endif
+
+        $$ = asd_new("(e)");
+        asd_add_child($$, $2);
+
+
+    }
     | '+' termo
+    {
+        #ifdef DEBUG_MESSAGES
+            printf("> chegou no '+' termo\n");
+            printf("%s\n", $2->label);
+        #endif
+        $$ = asd_new("+");
+        asd_add_child($$, $2);
+
+    }
+
     | '-' termo
+    {
+        #ifdef DEBUG_MESSAGES
+            printf("> chegou no '-' termo\n");
+            printf("%s\n", $2->label);
+        #endif
+        $$ = asd_new("-");
+        asd_add_child($$, $2);
+
+    }
+
     | '!' termo
+    {
+        #ifdef DEBUG_MESSAGES
+            printf("> chegou no '!' termo\n");
+            printf("%s\n", $2->label);
+        #endif
+        $$ = asd_new("!");
+        asd_add_child($$, $2);
+
+    }
 ;
 
 
@@ -301,8 +538,35 @@ operando
     : 
     comando_simples_chamada_de_funcao
     | TK_ID
+    {
+        #ifdef DEBUG_MESSAGES
+            printf("> TK_ID\n");
+            printf("> %s\n", ($1));
+        #endif
+
+        $$ = asd_new($1);
+    }
+
+
     | TK_LI_FLOAT
-    | TK_LI_INT
+    {
+        #ifdef DEBUG_MESSAGES
+            printf("> TK_LI_FLOAT\n");
+            printf("> %s\n", ($1));
+        #endif
+
+        $$ = asd_new($1);
+    }
+
+
+    | TK_LI_INT {
+        #ifdef DEBUG_MESSAGES
+            printf("> TK_LI_INT\n");
+            printf("> %s\n", ($1));
+        #endif
+
+        $$ = asd_new($1);
+    }
 ;
 
 %%
