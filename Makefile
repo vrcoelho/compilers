@@ -1,4 +1,5 @@
 CFLAGS += -fsanitize=address
+CFLAGS += -DDEBUG_MESSAGES
 
 parser.tab.c parser.tab.h: parser.y
 	bison -d -v --report=all parser.y
