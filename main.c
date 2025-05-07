@@ -2,6 +2,7 @@
 #include "asd.h"
 extern int yyparse(void);
 extern int yylex_destroy(void);
+extern int yydebug;
 asd_tree_t *arvore = NULL;
 int main (int argc, char **argv)
 {
