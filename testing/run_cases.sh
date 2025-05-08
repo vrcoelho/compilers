@@ -32,7 +32,7 @@ do
     echo "" >> testcases_output
 
 
-    # se o retorno do codigo c foi 0 (sucesso)
+    # se o retorno do codigo c foi igual ao esperado
     if [ "$result" -eq "$return_expected" ]
     then
         # echo "caso $filename: OK"
