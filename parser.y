@@ -9,11 +9,6 @@ void yyerror (char const *mensagem);
 extern int get_line_number(void);
 extern asd_tree_t *arvore;
 
-struct svalor_lexico {
-  int line_number;
-  char *token_type;
-  char *value;
-  };
 %}
 
 %debug
@@ -25,9 +20,10 @@ struct svalor_lexico {
 %union {
   int intval;
   struct asd_tree* node;
-  char * value;
-//   struct svalor_lexico valor_lexico;
+  struct  svalor_lexico * valor_lexico;
 }
+
+%destructor { svalor_lexico_free($$); } <valor_lexico>
 
 /*
 DEFINICAO DE TOKENS
@@ -47,7 +43,7 @@ DEFINICAO DE TOKENS
 %token TK_OC_GE
 %token TK_OC_EQ
 %token TK_OC_NE
-%token <value>TK_ID TK_LI_INT TK_LI_FLOAT
+%token <valor_lexico>TK_ID TK_LI_INT TK_LI_FLOAT
 %token TK_ER
 
 // non terminals
@@ -175,12 +171,14 @@ declaracao_da_variavel
         $$ = asd_new("as");
 
         asd_add_child($$, 
-            asd_new($2)
+            // asd_new($2)
+            asd_new($2->value)
         );
 
         // TODO ADD SECOND CHILD
         // SHOULD BE THE TYPE
 
+        svalor_lexico_free($2);
 
      }
 ;
@@ -278,7 +276,12 @@ cabecalho
 ;
 
 nome_da_funcao
-    : TK_ID {$$ = asd_new($1);}
+    : TK_ID {
+        // $$ = asd_new($1);
+        $$ = asd_new($1->value);
+
+        svalor_lexico_free($1);
+        }
 ;
 
 
@@ -317,10 +320,13 @@ decl
         #endif
         $$ = asd_new("decl (as)");
         asd_add_child($$, 
-        asd_new($1)
+        // asd_new($1)
+        asd_new($1->value)
         );
         // TODO CHECK THE TIPO
         asd_add_child($$, asd_new("tipo"));
+
+        svalor_lexico_free($1);
     }
     
 ;
@@ -426,10 +432,13 @@ comando_simples_comando_de_atribuicao
 
         $$ = asd_new("expressao is");
         asd_add_child($$, 
-            asd_new($1)
+            // asd_new($1)
+            asd_new($1->value)
             // we have to create on the spot. why?
         );
         asd_add_child($$, $3);
+
+        svalor_lexico_free($1);
 
     }
 ;
@@ -445,11 +454,13 @@ comando_simples_chamada_de_funcao
 
         $$ = asd_new("argumentos");
         asd_add_child($$, 
-            asd_new($1)
+            // asd_new($1)
+            asd_new($1->value)
             // we have to create on the spot. why?
         );
         asd_add_child($$, $3);
 
+        svalor_lexico_free($1);
     }
 ;
 
@@ -677,7 +688,8 @@ operando
             printf("> %s\n", ($1));
         #endif
 
-        $$ = asd_new($1);
+        $$ = asd_new($1->value);
+        svalor_lexico_free($1);
     }
 
 
@@ -688,7 +700,8 @@ operando
             printf("> %s\n", ($1));
         #endif
 
-        $$ = asd_new($1);
+        $$ = asd_new($1->value);
+        svalor_lexico_free($1);
     }
 
 
@@ -698,7 +711,8 @@ operando
             printf("> %s\n", ($1));
         #endif
 
-        $$ = asd_new($1);
+        $$ = asd_new($1->value);
+        svalor_lexico_free($1);
     }
 ;
 

@@ -2,6 +2,7 @@
  /*00219819 - MARIANA KOPPE PIERUCCI
  00243463 - VANESSA RIGHI COELHO*/
 // #include "tokens.h"
+#include "asd.h"
 #include "parser.tab.h"
 #include <stdlib.h>
 
@@ -37,32 +38,19 @@ int get_line_number(void);
 
  /* literal float */
 [0-9]*\.[0-9]+  {
-  // TODO review
-  // yylval.valor_lexico.line_number =  yylineno;
-  // yylval.valor_lexico.token_type ="TK_LI_FLOAT";
-  // yylval.valor_lexico.value = strdup(yytext) ;
-  yylval.value = strdup(yytext) ;
+    yylval.valor_lexico = svalor_lexico_new(yylineno, "TK_LI_FLOAT", yytext);
    return TK_LI_FLOAT;
 }    
 
  /* literal int */
 [0-9]+  {
-  // TODO review
-  // yylval.intval = atoi(yytext);
-  // yylval.valor_lexico.line_number =  yylineno;
-  // yylval.valor_lexico.token_type ="TK_LI_INT";
-  // yylval.valor_lexico.value = strdup(yytext) ;
-  yylval.value = strdup(yytext) ;
+  yylval.valor_lexico = svalor_lexico_new(yylineno, "TK_LI_INT", yytext);
   return TK_LI_INT;
 }             
 
  /* identificadores */
 [a-z_][a-z_0-9]*    {
-  // TODO review
-  // yylval.valor_lexico.line_number =  yylineno;
-  // yylval.valor_lexico.token_type ="TK_ID";
-  // yylval.valor_lexico.value = strdup(yytext) ;
-  yylval.value = strdup(yytext) ;
+  yylval.valor_lexico = svalor_lexico_new(yylineno, "TK_ID", yytext);
   return TK_ID;
 }
 
