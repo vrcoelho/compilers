@@ -67,7 +67,8 @@ DEFINICAO DE TOKENS
 
 %type <node> lista_de_argumentos_separados_por_virgula
 
-%type <node> variavel_inicializacao tipo_inicializacao
+%type <node> variavel_inicializacao tipo_inicializacao tipo_da_variavel
+
 
 %%
 
@@ -164,7 +165,11 @@ variavel_inicializavel
         // svalor_lexico_free($1);
         // $$ = NULL;
         // todo pretty sure we need to do something
-        asd_free($1);
+        // printf(
+        //      "dec"
+        // );
+        // we already freed
+        // asd_free($1);
         $$ = NULL;
     }
     | declaracao_da_variavel  variavel_inicializacao
@@ -178,26 +183,19 @@ declaracao_da_variavel
     :
      TK_PR_DECLARE TK_ID TK_PR_AS tipo_da_variavel
      {
-        // // O comando de atribuição deve ter 
-        // // pelo menos dois filhos, um que é 
-        // // o identificador e outro que é o 
-        // // valor da expressão
-        // $$ = asd_new("as");
-
-        // asd_add_child($$, 
-        //     // asd_new($2)
-        //     asd_new($2->value)
-        // );
-
-        // // TODO ADD SECOND CHILD
-        // // SHOULD BE THE TYPE
-
-        // svalor_lexico_free($2);
-
+        #ifdef DEBUG_MESSAGES
+            printf("> TK_PR_DECLARE TK_ID TK_PR_AS tipo_da_variavel\n");
+        #endif
+        // na verdade eu nao quero botar a declaracao na arvore
+        // porque?
+        // so 'ainda' nao?
 
         // colocando apenas o nome
-        $$ = asd_new($2->value);
+        // $$ = asd_new($2->value);
+
+        // free o nome da variavel, no label
         svalor_lexico_free($2);
+        $$ = NULL;
      }
 ;
 
@@ -223,7 +221,6 @@ variavel_inicializacao
             asd_new($2->label)
         );
 
-        // i want just the label and the node I can free
         asd_free($2);
 
      }
@@ -311,6 +308,8 @@ cabecalho
 
         // apenas fazendo upgrade do nome da funcao
         $$ = $1;
+
+        // e o resto?
 
     }
 ;
