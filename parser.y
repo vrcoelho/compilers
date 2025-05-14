@@ -67,8 +67,7 @@ DEFINICAO DE TOKENS
 
 %type <node> lista_de_argumentos_separados_por_virgula
 
-%type <node> variavel_inicializacao tipo_inicializacao tipo_da_variavel
-
+%type <node> variavel_inicializacao tipo_inicializacao 
 
 %%
 
@@ -357,13 +356,6 @@ decl
             printf("> decl\n");
             printf("> TK_ID TK_PR_AS tipo_de_parametro\n");
         #endif
-        $$ = asd_new("decl (as)");
-        asd_add_child($$, 
-        // asd_new($1)
-        asd_new($1->value)
-        );
-        // TODO CHECK THE TIPO
-        asd_add_child($$, asd_new("tipo"));
 
         svalor_lexico_free($1);
     }
