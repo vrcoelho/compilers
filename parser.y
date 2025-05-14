@@ -160,19 +160,17 @@ variavel_inicializavel
     
     declaracao_da_variavel
     {
-        // $$ = $1;
-        // svalor_lexico_free($1);
-        // $$ = NULL;
-        // todo pretty sure we need to do something
-        // printf(
-        //      "dec"
-        // );
-        // we already freed
-        // asd_free($1);
+        #ifdef DEBUG_MESSAGES
+            printf("> declaracao_da_variavel\n");
+        #endif
+        asd_free($1);
         $$ = NULL;
     }
     | declaracao_da_variavel  variavel_inicializacao
     {
+        #ifdef DEBUG_MESSAGES
+            printf("> declaracao_da_variavel  variavel_inicializacao\n");
+        #endif
         asd_add_child($2, $1);
         $$ = $2;
     }
@@ -185,16 +183,18 @@ declaracao_da_variavel
         #ifdef DEBUG_MESSAGES
             printf("> TK_PR_DECLARE TK_ID TK_PR_AS tipo_da_variavel\n");
         #endif
-        // na verdade eu nao quero botar a declaracao na arvore
-        // porque?
-        // so 'ainda' nao?
+
+        // estou colocando o label na arvore, se nao precisar*
+        // removo no nodo de cima
+
+        // * nao precisaria porque se a variavel for apenas
+        // declarada e nao inicializada
+        // nao colocamos na arvore neste momento
 
         // colocando apenas o nome
-        // $$ = asd_new($2->value);
-
+        $$ = asd_new($2->value);
         // free o nome da variavel, no label
         svalor_lexico_free($2);
-        $$ = NULL;
      }
 ;
 
