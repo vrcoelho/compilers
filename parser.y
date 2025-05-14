@@ -160,10 +160,12 @@ variavel_inicializavel
     
     declaracao_da_variavel
     {
-        $$ = $1;
+        // $$ = $1;
         // svalor_lexico_free($1);
         // $$ = NULL;
         // todo pretty sure we need to do something
+        asd_free($1);
+        $$ = NULL;
     }
     | declaracao_da_variavel  variavel_inicializacao
     {
@@ -261,31 +263,14 @@ funcao
                 else 
                 {
                     printf("> o corpo eh vazio?n\n");
-                    // asd_print($2);
                 }
                 
 
-                // o corpo pode ser vazio! cuidado
-
         #endif
 
-        // $$ = asd_new("func");
 
-
-        // // NAO vamos ignorar completamente o cabecalho
-        // asd_add_child($$, $1);
-        // // temos que adicionar primeiro o cabecalho e depois o corpo
-
-
-        // // 1. Listas de funções, onde cada função tem 
-        // // dois filhos, um que é o seu primeiro comando
-        // //  e outro que é a próxima função;
-        // asd_add_child($$, $2);
-
-        // // add null child for second element?
-        // // asd_add_child($$, NULL);
-
-
+        // o que realmente fazer se o corpo eh vazio?
+        // se eh adiciono se nao, nao
         if ($2 == NULL) 
         {
             // printf("> o corpo eh vazio?s\n");
@@ -322,18 +307,6 @@ cabecalho
             printf("> nome_da_funcao TK_PR_RETURNS tipo_da_variavel lista_de_parametros_que_pode_ser_vazia TK_PR_IS\n");
             printf("%s\n", $1->label);
         #endif
-
-        // $$ = asd_new("cabecalho is");
-        // asd_add_child($$, 
-        //     $1 // nome da funcao
-        // );
-
-
-        // // cuidar que lista_de_parametros_que_pode_ser_vazia
-        // // PODE SER VAZIA 
-        // // logo checar $4
-        // asd_add_child($$, $4);
-
 
 
         // apenas fazendo upgrade do nome da funcao
@@ -452,19 +425,22 @@ sequencia_de_comandos_simples
     : comando_simples {
         #ifdef DEBUG_MESSAGES
             printf("> comando_simples!!!!!!\n");
-            printf("%s\n", $1->label);
+            if (!($1 == NULL)) 
+                  printf("%s\n", $1->label);
         #endif
         $$ = $1;
     }
     | comando_simples sequencia_de_comandos_simples {
         #ifdef DEBUG_MESSAGES
-            // printf("> sequencia_de_comandos_simples comando_simples\n");
             printf("> comando_simples sequencia_de_comandos_simples\n");
+            if (!($1 == NULL))
+                printf("%s\n", $1->label);
 
-            printf("%s\n", $1->label);
 
-            asd_print($1);
-            asd_print($2);
+            if (!($1 == NULL))
+                asd_print($1);
+            if (!($2 == NULL))
+                asd_print($2);
         #endif
 
 
@@ -472,10 +448,24 @@ sequencia_de_comandos_simples
 
         // AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
         // ridiculo de facil com a rec correta
-        asd_add_child(
-            $1,
-            $2);
-        $$ = $1;
+
+        if ($1 == NULL)
+        {
+            $$ = $2;
+        } else if ($2 == NULL)
+        {
+            $$ = $1;
+        } else
+        {
+            asd_add_child(
+                $1,
+                $2);
+            $$ = $1;
+        }
+
+
+
+
     }
 ;
 
@@ -589,7 +579,11 @@ lista_de_argumentos_separados_por_virgula
         #ifdef DEBUG_MESSAGES
         
             printf("argumento ','\n");
-            printf("%s\n", $1->label);
+            
+            if ($1 == NULL)
+                printf("> eh nulo\n");
+            else
+                printf("%s\n", $1->label);
         #endif
 
         $$ = $1;
