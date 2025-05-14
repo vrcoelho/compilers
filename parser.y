@@ -3,6 +3,7 @@
  00243463 - VANESSA RIGHI COELHO*/
 #include <stdio.h>
 #include "asd.h"
+#include <string.h>
 
 int yylex(void);
 void yyerror (char const *mensagem);
@@ -141,9 +142,8 @@ lista_de_elementos
         #ifdef DEBUG_MESSAGES
             printf("> lista_de_elementos ',' funcao\n");
         #endif
-        $$ = asd_new("l,f");
-        asd_add_child($$, $1);
-        asd_add_child($$, $3);
+        asd_add_child($1, $3);
+        $$ = $1;
         } 
    
 ;
@@ -252,18 +252,18 @@ funcao
                 // printf("////> %s\n",$1->label);
 
                 // $$ = $2;
-                if ($2 == NULL)
-                fprintf(stderr, "lNULLNULLNULLNULL\n");
+                if ($2 == NULL) 
+                {
+                    printf("> o corpo eh vazio?s\n");
+                }
+                else 
+                {
+                    printf("> o corpo eh vazio?n\n");
+                    // asd_print($2);
+                }
                 
 
                 // o corpo pode ser vazio! cuidado
-                if ($2->label == NULL)
-                {
-        printf("> ererwrw\n");
-                    fprintf(stderr, "lNULLNULLNULLNULL\n");
-                
-                
-                }
 
         #endif
 
@@ -284,7 +284,22 @@ funcao
         // // asd_add_child($$, NULL);
 
 
-        asd_add_child($1, $2);
+        if ($2 == NULL) 
+        {
+            // printf("> o corpo eh vazio?s\n");
+            // ta mas e dai?? como q g acaba vindo com vazio?
+            
+        }
+        else 
+        {
+            // printf("> o corpo eh vazio?n\n");
+            asd_add_child($1, $2);
+            
+        }
+                
+
+
+        
         $$ = $1;
 
     }
@@ -303,6 +318,7 @@ cabecalho
         #ifdef DEBUG_MESSAGES
             printf("> cabecalho\n");
             printf("> nome_da_funcao TK_PR_RETURNS tipo_da_variavel lista_de_parametros_que_pode_ser_vazia TK_PR_IS\n");
+            printf("%s\n", $1->label);
         #endif
 
         // $$ = asd_new("cabecalho is");
@@ -393,8 +409,19 @@ bloco_de_comandos
             printf("> '[' sequencia_de_comandos_simples_possivelmente_vazia ']'\n");
         #endif
 
+        // printf(">asdas '[' sequencia_de_comandos_simples_possivelmente_vazia ']'\n");
+        if ($2 == NULL) {
+            // printf(">fsdfsdf '[' sequencia_de_comandos_simples_possivelmente_vazia ']'\n");
+        // # need to check if its empty
+            $$ = NULL;
+        }
+        else {
+            // printf("nao eh vazio> '[' sequencia_de_comandos_simples_possivelmente_vazia ']'\n");
+            $$ = $2;
+            }
 
-        $$ = $2;
+
+
     }
 
 ;
@@ -405,9 +432,10 @@ sequencia_de_comandos_simples_possivelmente_vazia
     : %empty
     {
         #ifdef DEBUG_MESSAGES
-            printf("> empty\n");
+            printf("> comandos empty\n");
         #endif
-        $$ = asd_new("c empty");
+        // $$ = asd_new("comandos empty");
+        $$ = NULL;
     }
 
     | sequencia_de_comandos_simples {
@@ -425,53 +453,27 @@ sequencia_de_comandos_simples
             printf("%s\n", $1->label);
         #endif
         $$ = $1;
-
     }
-    | sequencia_de_comandos_simples comando_simples  {
+    | comando_simples sequencia_de_comandos_simples {
         #ifdef DEBUG_MESSAGES
-            printf("> sequencia_de_comandos_simples comando_simples\n");
+            // printf("> sequencia_de_comandos_simples comando_simples\n");
+            printf("> comando_simples sequencia_de_comandos_simples\n");
+
             printf("%s\n", $1->label);
+
+            asd_print($1);
+            asd_print($2);
         #endif
-
-        // TODO aqui vou ter que adicionar os filhos, eh isso?
-
-        // $$ = asd_new("seq_comandos");
-        // asd_add_child($$, $1);
-        // asd_add_child($$, $2);
-        #ifdef DEBUG_MESSAGES
-            if (!$2) {
-                        
-                    printf("> $2 era nulo!!!\n");
-            
-                } 
-                printf("%s\n", $2->label);
-        #endif
-
-        if (!$2) {
-                        
-                    printf("> $1 era nulo!!!\n");
-            
-        } 
-
-
-        if (!asd_is_leaf($1)) {
-            asd_add_child(asd_last_parent($1), $2);
-            $$ = $1;
-        } else {
-            svalor_lexico_free($1);
-            $$ = $2;
-        }
 
 
         
 
-
-        // asd_add_child(
-        //     // $1->children[$1->number_of_children - 1],
-        //     // $1,
-        //     $2);
-
-        
+        // AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        // ridiculo de facil com a rec correta
+        asd_add_child(
+            $1,
+            $2);
+        $$ = $1;
     }
 ;
 
