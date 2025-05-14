@@ -66,6 +66,8 @@ DEFINICAO DE TOKENS
 
 %type <node> lista_de_argumentos_separados_por_virgula
 
+%type <node> variavel_inicializacao tipo_inicializacao
+
 %%
 
 
@@ -157,29 +159,42 @@ variavel_inicializavel
     :
     
     declaracao_da_variavel
+    {
+        $$ = $1;
+        // svalor_lexico_free($1);
+        // $$ = NULL;
+    }
     | declaracao_da_variavel  variavel_inicializacao
+    {
+        asd_add_child($2, $1);
+        $$ = $2;
+    }
 ;
 
 declaracao_da_variavel
     :
      TK_PR_DECLARE TK_ID TK_PR_AS tipo_da_variavel
      {
-        // O comando de atribuição deve ter 
-        // pelo menos dois filhos, um que é 
-        // o identificador e outro que é o 
-        // valor da expressão
-        $$ = asd_new("as");
+        // // O comando de atribuição deve ter 
+        // // pelo menos dois filhos, um que é 
+        // // o identificador e outro que é o 
+        // // valor da expressão
+        // $$ = asd_new("as");
 
-        asd_add_child($$, 
-            // asd_new($2)
-            asd_new($2->value)
-        );
+        // asd_add_child($$, 
+        //     // asd_new($2)
+        //     asd_new($2->value)
+        // );
 
-        // TODO ADD SECOND CHILD
-        // SHOULD BE THE TYPE
+        // // TODO ADD SECOND CHILD
+        // // SHOULD BE THE TYPE
 
+        // svalor_lexico_free($2);
+
+
+        // colocando apenas o nome
+        $$ = asd_new($2->value);
         svalor_lexico_free($2);
-
      }
 ;
 
@@ -192,11 +207,36 @@ tipo_da_variavel
 
 variavel_inicializacao
     : TK_PR_WITH tipo_inicializacao
+         {
+        // O comando de atribuição deve ter 
+        // pelo menos dois filhos, um que é 
+        // o identificador e outro que é o 
+        // valor da expressão
+        $$ = asd_new("with");
+
+        //  printf("> TK_PR_WITH tipo_inicializacao. lavel: %s\n", ($2->label));
+
+        asd_add_child($$, 
+            asd_new($2->label)
+        );
+
+        svalor_lexico_free($2);
+
+     }
     ;
 
 tipo_inicializacao
     : TK_LI_INT
+    {
+        // printf("> o valor era no tipo_inicializacao %s\n", ($1->value));
+            $$ = asd_new($1->value);
+            // svalor_lexico_free($1);
+    }
     | TK_LI_FLOAT
+    {
+            $$ = asd_new($1->value);
+            // svalor_lexico_free($1);
+    }
 ;
 
 // funcoes
@@ -227,22 +267,25 @@ funcao
 
         #endif
 
-        $$ = asd_new("func");
+        // $$ = asd_new("func");
 
 
-        // NAO vamos ignorar completamente o cabecalho
-        asd_add_child($$, $1);
-        // temos que adicionar primeiro o cabecalho e depois o corpo
+        // // NAO vamos ignorar completamente o cabecalho
+        // asd_add_child($$, $1);
+        // // temos que adicionar primeiro o cabecalho e depois o corpo
 
 
-        // 1. Listas de funções, onde cada função tem 
-        // dois filhos, um que é o seu primeiro comando
-        //  e outro que é a próxima função;
-        asd_add_child($$, $2);
+        // // 1. Listas de funções, onde cada função tem 
+        // // dois filhos, um que é o seu primeiro comando
+        // //  e outro que é a próxima função;
+        // asd_add_child($$, $2);
 
-        // add null child for second element?
-        // asd_add_child($$, NULL);
+        // // add null child for second element?
+        // // asd_add_child($$, NULL);
 
+
+        asd_add_child($1, $2);
+        $$ = $1;
 
     }
 ;
@@ -262,15 +305,21 @@ cabecalho
             printf("> nome_da_funcao TK_PR_RETURNS tipo_da_variavel lista_de_parametros_que_pode_ser_vazia TK_PR_IS\n");
         #endif
 
-        $$ = asd_new("cabecalho is");
-        asd_add_child($$, 
-            $1 // nome da funcao
-        );
+        // $$ = asd_new("cabecalho is");
+        // asd_add_child($$, 
+        //     $1 // nome da funcao
+        // );
 
-        // cuidar que lista_de_parametros_que_pode_ser_vazia
-        // PODE SER VAZIA 
-        // logo checar $4
-        asd_add_child($$, $4);
+
+        // // cuidar que lista_de_parametros_que_pode_ser_vazia
+        // // PODE SER VAZIA 
+        // // logo checar $4
+        // asd_add_child($$, $4);
+
+
+
+        // apenas fazendo upgrade do nome da funcao
+        $$ = $1;
 
     }
 ;
@@ -293,7 +342,7 @@ lista_de_parametros_que_pode_ser_vazia
         #ifdef DEBUG_MESSAGES
             printf("> empty\n");
         #endif
-        $$ = asd_new("parametro empty");
+        // $$ = asd_new("parametro empty");
     }
 
     | lista_wrapper
@@ -372,7 +421,7 @@ sequencia_de_comandos_simples_possivelmente_vazia
 sequencia_de_comandos_simples
     : comando_simples {
         #ifdef DEBUG_MESSAGES
-            printf("> comando_simples\n");
+            printf("> comando_simples!!!!!!\n");
             printf("%s\n", $1->label);
         #endif
         $$ = $1;
@@ -385,9 +434,44 @@ sequencia_de_comandos_simples
         #endif
 
         // TODO aqui vou ter que adicionar os filhos, eh isso?
-        $$ = asd_new("seq_comandos");
-        asd_add_child($$, $1);
-        asd_add_child($$, $2);
+
+        // $$ = asd_new("seq_comandos");
+        // asd_add_child($$, $1);
+        // asd_add_child($$, $2);
+        #ifdef DEBUG_MESSAGES
+            if (!$2) {
+                        
+                    printf("> $2 era nulo!!!\n");
+            
+                } 
+                printf("%s\n", $2->label);
+        #endif
+
+        if (!$2) {
+                        
+                    printf("> $1 era nulo!!!\n");
+            
+        } 
+
+
+        if (!asd_is_leaf($1)) {
+            asd_add_child(asd_last_parent($1), $2);
+            $$ = $1;
+        } else {
+            svalor_lexico_free($1);
+            $$ = $2;
+        }
+
+
+        
+
+
+        // asd_add_child(
+        //     // $1->children[$1->number_of_children - 1],
+        //     // $1,
+        //     $2);
+
+        
     }
 ;
 
@@ -430,7 +514,7 @@ comando_simples_comando_de_atribuicao
             printf("%s\n", $3->label);
         #endif
 
-        $$ = asd_new("expressao is");
+        $$ = asd_new("is");
         asd_add_child($$, 
             // asd_new($1)
             asd_new($1->value)
@@ -452,15 +536,14 @@ comando_simples_chamada_de_funcao
 
         #endif
 
-        $$ = asd_new("argumentos");
-        asd_add_child($$, 
-            // asd_new($1)
-            asd_new($1->value)
-            // we have to create on the spot. why?
-        );
+        char *new_label;
+        asprintf(&new_label, "call %s", $1->value);
+
+        $$ = asd_new(new_label);
         asd_add_child($$, $3);
 
         svalor_lexico_free($1);
+        free(new_label);
     }
 ;
 
@@ -473,26 +556,52 @@ lista_de_argumentos
         $$ = asd_new("larg empty");
     }
     | argumento
+    { 
+        #ifdef DEBUG_MESSAGES
+            printf("! argumento\n");
+        #endif
+        $$ = $1;
+    }
     | lista_de_argumentos_separados_por_virgula argumento 
     {
         #ifdef DEBUG_MESSAGES
             printf("> lista_de_argumentos_separados_por_virgula argumento\n");
         #endif
-        $$ = asd_new("list args");
-        asd_add_child($$, $1);
-        asd_add_child($$, $2);
+
+
+        // $$ = asd_new("list args");
+        // asd_add_child($$, $1);
+        // asd_add_child($$, $2);
+
+
+        asd_add_child(asd_last_child($1), $2);
+        $$ = $1;
     }
 ;
 
 lista_de_argumentos_separados_por_virgula
     : argumento ','
+    {
+        #ifdef DEBUG_MESSAGES
+        
+            printf("argumento ','\n");
+            printf("%s\n", $1->label);
+        #endif
+
+        $$ = $1;
+    }
+
     | lista_de_argumentos_separados_por_virgula argumento ','     {
         #ifdef DEBUG_MESSAGES
             printf("> lista_de_argumentos_separados_por_virgula argumento ','\n");
         #endif
-        $$ = asd_new("list args c virgula");
-        asd_add_child($$, $1);
-        asd_add_child($$, $2);
+        // $$ = asd_new("list args c virgula");
+        // asd_add_child($$, $1);
+        // asd_add_child($$, $2);
+
+
+        asd_add_child(asd_last_child($1), $2);
+        $$ = $1;
     }
 ;
 
