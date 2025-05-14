@@ -163,6 +163,7 @@ variavel_inicializavel
         $$ = $1;
         // svalor_lexico_free($1);
         // $$ = NULL;
+        // todo pretty sure we need to do something
     }
     | declaracao_da_variavel  variavel_inicializacao
     {
@@ -220,7 +221,8 @@ variavel_inicializacao
             asd_new($2->label)
         );
 
-        svalor_lexico_free($2);
+        // i want just the label and the node I can free
+        asd_free($2);
 
      }
     ;
@@ -230,12 +232,12 @@ tipo_inicializacao
     {
         // printf("> o valor era no tipo_inicializacao %s\n", ($1->value));
             $$ = asd_new($1->value);
-            // svalor_lexico_free($1);
+            svalor_lexico_free($1);
     }
     | TK_LI_FLOAT
     {
             $$ = asd_new($1->value);
-            // svalor_lexico_free($1);
+            svalor_lexico_free($1);
     }
 ;
 
