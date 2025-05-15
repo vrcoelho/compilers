@@ -7,71 +7,83 @@
 
 ok=0
 err=0
-for case in ./cases/etapa2/asl*
+eq=0
+neq=0
+
+
+for case in ./cases/etapa3/z*
 do
     filename=$(basename "$case")
     # echo "EXECUTANDO $filename"
 
-    return_expected=0    
-    line=$(head -n 1 "$case")
-    if [ "$line" != "//CORRECT" ]
+    if [[ "$filename" =~ ^z.*\.ref.dot$ ]]
     then
-        return_expected=1
-    fi
+        # resposta a gerar gabarito
 
-    # executa nosso programa
-
-    # echo "===================" >> testcases_output
-
-    # echo "TESTE $case" >> testcases_output
-    touch ./cases/etapa3/results/"$filename"
-    # 2>&1 manda tanto o stderr quanto stdout
-    ./../../compilers/etapa3 < "$case" >> ./cases/etapa3/results/"$filename" 2>&1
-
-    # captura resultado aqui, logo apos execucao
-    result=$?
-
-    # echo "\n===================" >> testcases_output
-    # echo "" >> testcases_output
-
-
-    # se o retorno do codigo c foi igual ao esperado
-    if [ "$result" -eq "$return_expected" ]
-    then
-        # echo "caso $filename: OK"
-        # se esperava ser sucesso
-        if [ "$result" -eq 0 ]
-        then
-            :
-            # echo "caso $filename: OK"
-
-
-            # posso criar o png da arvore gerada
-            dot -Tpng ./cases/etapa3/results/"$filename" -o ./cases/etapa3/results/"$filename".png > /dev/null 2>&1
-
-        fi
-        ok=$((ok + 1))
-
-        if [ "$result" -eq 1 ]
-        then
-            :
-            # se era erro posso apagar o arquivo
-            # rm touch ./cases/etapa3/results/"$filename"
-        fi
+        dot -Tpng ./cases/etapa3/"$filename" -o ./cases/etapa3/results/"$filename"_resposta.png > /dev/null 2>&1
     else
-        # se esperava ser error
-        # if [ "$return_expected" -eq 1 ]
+        # caso de teste per se
+    
+        # nesse caso todos os testes devem terminar com ok
+        return_expected=0    
+       
+        touch ./cases/etapa3/results/"$filename"
+        > ./cases/etapa3/results/"$filename"
+        # 2>&1 manda tanto o stderr quanto stdout
+        ./../../compilers/etapa3 < "$case" >> ./cases/etapa3/results/"$filename" 2>&1
 
+        # captura resultado aqui, logo apos execucao
+        result=$?
 
-        # se esperava ser aceito
-        if [ "$return_expected" -eq 0 ]
+        # se o retorno do codigo c foi igual ao esperado
+        if [ "$result" -eq "$return_expected" ]
         then
-            echo "              caso $filename: ERROR"
-            :
-        fi
-        err=$((err + 1))
-    fi  
+            # echo "caso $filename: OK"
+            # se esperava ser sucesso
+            if [ "$result" -eq 0 ]
+            then
+                :
+
+                # posso criar o png da arvore gerada
+                dot -Tpng ./cases/etapa3/results/"$filename" -o ./cases/etapa3/results/"$filename".png > /dev/null 2>&1
+            
+            fi
+            ok=$((ok + 1))
+
+            
+
+            # como deu certo, verifico se as arvores geradas sao iguais
+            python3 compare_trees.py ./cases/etapa3/results/"$filename" ./cases/etapa3/"$filename".ref.dot
+
+            result2=$?
+            if [ "$result2" -eq 0 ]
+            then
+                eq=$((eq + 1))
+            else
+                neq=$((neq + 1))
+                echo "                  ] caso $filename: arvore diferente"
+            fi
+            
+
+
+        else
+            # se o retorno do codigo c foi igual ao esperado
+            # ou seja, um leak
+            echo "                  > caso $filename: leak"
+            err=$((err + 1))
+        fi  
+
+    fi
 done
 
+echo "====="
+echo "ABOUT LEAKS & GENERAL EXEC:"
+echo "====="
 echo "ok: $ok"
 echo "error: $err"
+
+echo "====="
+echo "ABOUT TREE EQUIVALENCE:"
+echo "====="
+echo "equal: $eq"
+echo "not equal: $neq"
