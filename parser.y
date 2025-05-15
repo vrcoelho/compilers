@@ -127,18 +127,14 @@ lista_de_elementos
 
          $$ = $1;
         } 
-    | lista_de_elementos ',' variavel   {
+    | variavel ',' lista_de_elementos    {
         #ifdef DEBUG_MESSAGES
             printf("> lista_de_elementos ',' variavel\n");
         #endif
-
-
-        $$ = asd_new("l,v");
-        asd_add_child($$, $1);
-        asd_add_child($$, $3);
-
+        asd_add_child($1, $3);
+        $$ = $1;
         } 
-    | lista_de_elementos ',' funcao     {
+    | funcao ',' lista_de_elementos      {
         #ifdef DEBUG_MESSAGES
             printf("> lista_de_elementos ',' funcao\n");
         #endif
