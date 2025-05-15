@@ -540,16 +540,21 @@ lista_de_argumentos
         #endif
         $$ = asd_new("larg empty");
     }
-    | argumento
+    | lista_de_argumentos_separados_por_virgula
     { 
         #ifdef DEBUG_MESSAGES
-            printf("! argumento\n");
+            printf("lista_de_argumentos_separados_por_virgula\n");
         #endif
         $$ = $1;
     }
-    | lista_de_argumentos_separados_por_virgula argumento 
-    // TODO to use the correct recursion, I will need to rewrite it
-    // | argumento lista_de_argumentos_separados_por_virgula  
+    ;
+
+lista_de_argumentos_separados_por_virgula
+    : argumento
+    {
+        $$ = $1;
+    }
+    | argumento ',' lista_de_argumentos_separados_por_virgula 
     {
         #ifdef DEBUG_MESSAGES
             printf("> lista_de_argumentos_separados_por_virgula argumento\n");
@@ -559,39 +564,7 @@ lista_de_argumentos
         // a nested expression, it does not work to add
         // to the last_child
 
-        asd_add_child($1, $2);
-        $$ = $1;
-    }
-;
-
-lista_de_argumentos_separados_por_virgula
-    : argumento ','
-    {
-        #ifdef DEBUG_MESSAGES
-        
-            printf("argumento ','\n");
-            
-            if ($1 == NULL)
-                printf("> eh nulo\n");
-            else
-                printf("%s\n", $1->label);
-        #endif
-
-        $$ = $1;
-    }
-
-    // | argumento lista_de_argumentos_separados_por_virgula ','     {
-    // TODO to use the correct recursion, I will need to rewrite it
-    | lista_de_argumentos_separados_por_virgula argumento ','     {
-        #ifdef DEBUG_MESSAGES
-            printf("> lista_de_argumentos_separados_por_virgula argumento ','\n");
-        #endif
-
-        // since the node can have children, as it can be
-        // a nested expression, it does not work to add
-        // to the last_child
-
-        asd_add_child($1, $2);
+        asd_add_child($1, $3);
         $$ = $1;
     }
 ;
