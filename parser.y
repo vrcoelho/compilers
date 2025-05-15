@@ -243,6 +243,9 @@ nome_da_funcao
 
 lista_de_parametros_que_pode_ser_vazia
     : %empty
+    {
+        $$ = NULL;
+    }
     | lista_wrapper
 ;
 
