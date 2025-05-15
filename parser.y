@@ -121,19 +121,27 @@ lista_de_elementos
     } 
     | variavel ',' lista_de_elementos    
     {
-        // aqui a variavel pode ser vazia pois
-        // nao incluo as decls
-        if ($1 == NULL){
-            $$ = $3;
-        } else {
+        // ambas variavel e lista_de_elementos podem ser
+        // vazias pois nao incluo as decls
+        if (($1 != NULL) && ($3 != NULL))
             asd_add_child($1, $3);
+            
+        if ($1 != NULL)
             $$ = $1;
-        }
+        else if ($3 != NULL)
+            $$ = $3;
     }
     | funcao ',' lista_de_elementos      
     {
-        asd_add_child($1, $3);
-        $$ = $1;
+        // ambas variavel e lista_de_elementos podem ser
+        // vazias pois nao incluo as decls
+        if (($1 != NULL) && ($3 != NULL))
+            asd_add_child($1, $3);
+
+        if ($1 != NULL)
+            $$ = $1;
+        else if ($3 != NULL)
+            $$ = $3;
     } 
    
 ;
