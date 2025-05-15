@@ -131,9 +131,16 @@ lista_de_elementos
         #ifdef DEBUG_MESSAGES
             printf("> lista_de_elementos ',' variavel\n");
         #endif
-        asd_add_child($1, $3);
-        $$ = $1;
-        } 
+
+        // aqui a variavel pode ser vazia pois
+        // nao incluo as decls
+        if ($1 == NULL){
+            $$ = $3;
+        } else {
+            asd_add_child($1, $3);
+            $$ = $1;
+        }
+    } 
     | funcao ',' lista_de_elementos      {
         #ifdef DEBUG_MESSAGES
             printf("> lista_de_elementos ',' funcao\n");
@@ -148,6 +155,13 @@ lista_de_elementos
 variavel
     : 
      declaracao_da_variavel 
+    {
+        #ifdef DEBUG_MESSAGES
+            printf("> variavel: declaracao_da_variavel\n");
+        #endif
+        asd_free($1);
+        $$ = NULL;
+    }
 
 ;
 
@@ -157,7 +171,7 @@ variavel_inicializavel
     declaracao_da_variavel
     {
         #ifdef DEBUG_MESSAGES
-            printf("> declaracao_da_variavel\n");
+            printf("> variavel_inicializavel: declaracao_da_variavel\n");
         #endif
         asd_free($1);
         $$ = NULL;
