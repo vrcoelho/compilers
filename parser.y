@@ -607,7 +607,7 @@ construcao_condicional
 
         #endif
 
-        $$ = asd_new("if simples");
+        $$ = asd_new("if");
         asd_add_child($$, $3);
         asd_add_child($$, $5);
 
@@ -621,7 +621,7 @@ construcao_condicional
             printf("> TK_PR_IF '(' expressao ')' bloco_de_comandos TK_PR_ELSE bloco_de_comandos \n");
         #endif
 
-        $$ = asd_new("if c else");
+        $$ = asd_new("if");
         asd_add_child($$, $3);
         asd_add_child($$, $5);
         asd_add_child($$, $7);
@@ -664,7 +664,7 @@ and
             printf("%s\n", $3->label);
         #endif
 
-        $$ = asd_new("a & b");
+        $$ = asd_new("&");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
     }
