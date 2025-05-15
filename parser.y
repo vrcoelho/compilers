@@ -548,18 +548,18 @@ lista_de_argumentos
         $$ = $1;
     }
     | lista_de_argumentos_separados_por_virgula argumento 
+    // TODO to use the correct recursion, I will need to rewrite it
+    // | argumento lista_de_argumentos_separados_por_virgula  
     {
         #ifdef DEBUG_MESSAGES
             printf("> lista_de_argumentos_separados_por_virgula argumento\n");
         #endif
 
+        // since the node can have children, as it can be
+        // a nested expression, it does not work to add
+        // to the last_child
 
-        // $$ = asd_new("list args");
-        // asd_add_child($$, $1);
-        // asd_add_child($$, $2);
-
-
-        asd_add_child(asd_last_child($1), $2);
+        asd_add_child($1, $2);
         $$ = $1;
     }
 ;
@@ -580,16 +580,18 @@ lista_de_argumentos_separados_por_virgula
         $$ = $1;
     }
 
+    // | argumento lista_de_argumentos_separados_por_virgula ','     {
+    // TODO to use the correct recursion, I will need to rewrite it
     | lista_de_argumentos_separados_por_virgula argumento ','     {
         #ifdef DEBUG_MESSAGES
             printf("> lista_de_argumentos_separados_por_virgula argumento ','\n");
         #endif
-        // $$ = asd_new("list args c virgula");
-        // asd_add_child($$, $1);
-        // asd_add_child($$, $2);
 
+        // since the node can have children, as it can be
+        // a nested expression, it does not work to add
+        // to the last_child
 
-        asd_add_child(asd_last_child($1), $2);
+        asd_add_child($1, $2);
         $$ = $1;
     }
 ;
@@ -673,6 +675,11 @@ construcao_iterativa
 expressao
     : and
     | expressao '|' and
+    {
+        $$ = asd_new("|");
+        asd_add_child($$, $1);
+        asd_add_child($$, $3);
+    }
 ;
 
 and
@@ -693,6 +700,11 @@ and
 igual_naoigual
     : maior_menor
     | igual_naoigual TK_OC_NE maior_menor
+    {
+        $$ = asd_new("!=");
+        asd_add_child($$, $1);
+        asd_add_child($$, $3);
+    }
     | igual_naoigual TK_OC_EQ maior_menor {
         #ifdef DEBUG_MESSAGES
             printf("> igual_naoigual TK_OC_EQ maior_menor\n");
@@ -710,22 +722,77 @@ igual_naoigual
 maior_menor
     : acumulacao
     | maior_menor TK_OC_GE acumulacao
+    {
+        $$ = asd_new(">=");
+        asd_add_child($$, $1);
+        asd_add_child($$, $3);
+    }
     | maior_menor TK_OC_LE acumulacao
+        {
+        $$ = asd_new("<=");
+        asd_add_child($$, $1);
+        asd_add_child($$, $3);
+    }
     | maior_menor '>' acumulacao
+    {
+        $$ = asd_new(">");
+        asd_add_child($$, $1);
+        asd_add_child($$, $3);
+    }
     | maior_menor '<' acumulacao
+    {
+        $$ = asd_new("<");
+        asd_add_child($$, $1);
+        asd_add_child($$, $3);
+    }
 ;
 
 acumulacao
     : fator
     | acumulacao '+' fator
+    {
+        #ifdef DEBUG_MESSAGES
+            printf("> acumulacao '+' fator\n");
+            printf("%s\n", $1->label);
+            printf("%s\n", $3->label);
+        #endif
+        $$ = asd_new("+");
+        asd_add_child($$, $1);
+        asd_add_child($$, $3);
+    }
     | acumulacao '-' fator
+        {
+        $$ = asd_new("-");
+        asd_add_child($$, $1);
+        asd_add_child($$, $3);
+    }
 ;
 
 fator
     : termo
     | fator '*' termo
+    {
+        #ifdef DEBUG_MESSAGES
+            printf("> acumulacao '*' fator\n");
+            printf("%s\n", $1->label);
+            printf("%s\n", $3->label);
+        #endif
+        $$ = asd_new("*");
+        asd_add_child($$, $1);
+        asd_add_child($$, $3);
+    }
     | fator '/' termo
+    {
+        $$ = asd_new("/");
+        asd_add_child($$, $1);
+        asd_add_child($$, $3);
+    }
     | fator '%' termo
+    {
+        $$ = asd_new("%");
+        asd_add_child($$, $1);
+        asd_add_child($$, $3);
+    }
 ;
 
 termo
@@ -735,10 +802,7 @@ termo
             printf("> chegou no '(' expressao ')'\n");
             printf("%s\n", $2->label);
         #endif
-
-        $$ = asd_new("(e)");
-        asd_add_child($$, $2);
-
+        $$ = $2;
 
     }
     | '+' termo
