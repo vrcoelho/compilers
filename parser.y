@@ -411,7 +411,8 @@ construcao_condicional
     {
         $$ = asd_new("if");
         asd_add_child($$, $3);
-        asd_add_child($$, $5);
+        if ($5 != NULL)
+            asd_add_child($$, $5);
 
     }
 
@@ -420,8 +421,10 @@ construcao_condicional
     {
         $$ = asd_new("if");
         asd_add_child($$, $3);
-        asd_add_child($$, $5);
-        asd_add_child($$, $7);
+        if ($5 != NULL)
+            asd_add_child($$, $5);
+        if ($7 != NULL)
+            asd_add_child($$, $7);
     }
 
 ;
@@ -432,7 +435,8 @@ construcao_iterativa
     {
         $$ = asd_new("while");
         asd_add_child($$, $3);
-        asd_add_child($$, $5);
+        if ($5 != NULL)
+            asd_add_child($$, $5);
     }
 ;
 
