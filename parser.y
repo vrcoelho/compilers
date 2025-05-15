@@ -100,9 +100,6 @@ programa
     : %empty
     | lista_de_elementos_wrapper
     {
-        #ifdef DEBUG_MESSAGES
-            printf(">programa: lista_de_elementos_wrapper\n");
-        #endif
         // return the tree
         arvore = $1;
     } 
@@ -112,32 +109,18 @@ lista_de_elementos_wrapper
     :
     lista_de_elementos   ';'   
     {
-        #ifdef DEBUG_MESSAGES
-            printf(">lista_de_elementos_wrapper: lista_de_elementos ';'\n");
-        #endif
         $$ = $1;
     } 
 ;
 
 lista_de_elementos
     : variavel    
-    {
-        #ifdef DEBUG_MESSAGES
-            printf("> variavel\n");
-        #endif
-    } 
     | funcao    
     {
-        #ifdef DEBUG_MESSAGES
-            printf("> funcao\n");
-        #endif
         $$ = $1;
     } 
     | variavel ',' lista_de_elementos    
     {
-        #ifdef DEBUG_MESSAGES
-            printf("> lista_de_elementos ',' variavel\n");
-        #endif
         // aqui a variavel pode ser vazia pois
         // nao incluo as decls
         if ($1 == NULL){
@@ -149,9 +132,6 @@ lista_de_elementos
     }
     | funcao ',' lista_de_elementos      
     {
-        #ifdef DEBUG_MESSAGES
-            printf("> lista_de_elementos ',' funcao\n");
-        #endif
         asd_add_child($1, $3);
         $$ = $1;
     } 
@@ -162,9 +142,6 @@ lista_de_elementos
 variavel
     : declaracao_da_variavel 
     {
-        #ifdef DEBUG_MESSAGES
-            printf("> variavel: declaracao_da_variavel\n");
-        #endif
         asd_free($1);
         $$ = NULL;
     }
@@ -174,17 +151,11 @@ variavel
 variavel_inicializavel
     : declaracao_da_variavel
     {
-        #ifdef DEBUG_MESSAGES
-            printf("> variavel_inicializavel: declaracao_da_variavel\n");
-        #endif
         asd_free($1);
         $$ = NULL;
     }
     | declaracao_da_variavel  variavel_inicializacao
     {
-        #ifdef DEBUG_MESSAGES
-            printf("> declaracao_da_variavel  variavel_inicializacao\n");
-        #endif
         asd_add_child($2, $1);
         $$ = $2;
     }
@@ -193,9 +164,6 @@ variavel_inicializavel
 declaracao_da_variavel
     : TK_PR_DECLARE TK_ID TK_PR_AS tipo_da_variavel
      {
-        #ifdef DEBUG_MESSAGES
-            printf("> TK_PR_DECLARE TK_ID TK_PR_AS tipo_da_variavel\n");
-        #endif
         // estou colocando o label na arvore, se nao precisar*
         // removo no nodo de cima
 
@@ -244,11 +212,6 @@ tipo_inicializacao
 funcao
     : cabecalho corpo 
     {
-        #ifdef DEBUG_MESSAGES
-            printf(">funcao: cabecalho corpo\n");
-            if ($2 == NULL) {printf("> o corpo eh vazio?s\n");}
-            else{printf("> o corpo eh vazio?n\n");}
-        #endif
         if ($2 != NULL) {
             asd_add_child($1, $2);
             
@@ -266,11 +229,6 @@ cabecalho
     : nome_da_funcao TK_PR_RETURNS tipo_da_variavel
      lista_de_parametros_que_pode_ser_vazia TK_PR_IS
     {
-        #ifdef DEBUG_MESSAGES
-            printf("> cabecalho\n");
-            printf("> nome_da_funcao TK_PR_RETURNS tipo_da_variavel lista_de_parametros_que_pode_ser_vazia TK_PR_IS\n");
-            printf("%s\n", $1->label);
-        #endif
         $$ = $1;
     }
 ;
@@ -285,11 +243,6 @@ nome_da_funcao
 
 lista_de_parametros_que_pode_ser_vazia
     : %empty
-    {
-        #ifdef DEBUG_MESSAGES
-            printf(">lista_de_parametros_que_pode_ser_vazia: empty\n");
-        #endif
-    }
     | lista_wrapper
 ;
 
@@ -311,9 +264,6 @@ decl
     :
     TK_ID TK_PR_AS tipo_de_parametro 
     {
-        #ifdef DEBUG_MESSAGES
-            printf(">decl: TK_ID TK_PR_AS tipo_de_parametro\n");
-        #endif
         svalor_lexico_free($1);
     }
 ;
@@ -325,9 +275,6 @@ tipo_de_parametro
 
 bloco_de_comandos
     : '[' sequencia_de_comandos_simples_possivelmente_vazia ']'  {
-        #ifdef DEBUG_MESSAGES
-            printf("> '[' sequencia_de_comandos_simples_possivelmente_vazia ']'\n");
-        #endif
         // even if its null
         $$ = $2;
     }
@@ -338,41 +285,15 @@ bloco_de_comandos
 sequencia_de_comandos_simples_possivelmente_vazia
     : %empty
     {
-        #ifdef DEBUG_MESSAGES
-            printf(">sequencia_de_comandos_simples_possivelmente_vazia: %empty\n");
-        #endif
         $$ = NULL;
     }
 
     | sequencia_de_comandos_simples 
-    {
-        #ifdef DEBUG_MESSAGES
-            printf("> sequencia_de_comandos_simples\n");
-        #endif
-        $$ = $1;
-    }
 ;
 
 sequencia_de_comandos_simples
     : comando_simples 
-    {
-        #ifdef DEBUG_MESSAGES
-            printf(">sequencia_de_comandos_simples: comando_simples\n");
-            if (!($1 == NULL)) 
-                  printf("%s\n", $1->label);
-        #endif
-        $$ = $1;
-    }
     | comando_simples sequencia_de_comandos_simples {
-        #ifdef DEBUG_MESSAGES
-            printf("> comando_simples sequencia_de_comandos_simples\n");
-            if (!($1 == NULL))
-                printf("%s\n", $1->label);
-            if (!($1 == NULL))
-                asd_print($1);
-            if (!($2 == NULL))
-                asd_print($2);
-        #endif
         if ($1 == NULL)
             $$ = $2;
         else if ($2 == NULL)
@@ -417,11 +338,6 @@ comando_simples_bloco_de_comandos
 comando_simples_comando_de_atribuicao
     : TK_ID TK_PR_IS expressao 
     {
-        #ifdef DEBUG_MESSAGES
-            printf("> TK_ID TK_PR_IS expressao\n");
-            printf("%s\n", $1);
-            printf("%s\n", $3->label);
-        #endif
         $$ = asd_new("is");
         asd_add_child($$, 
             asd_new($1->value)
@@ -435,11 +351,6 @@ comando_simples_comando_de_atribuicao
 comando_simples_chamada_de_funcao
     : TK_ID'(' lista_de_argumentos')' 
     {
-        #ifdef DEBUG_MESSAGES
-            printf("> comando_simples_chamada_de_funcao\n");
-            printf("> TK_ID'(' lista_de_argumentos')'\n");
-        #endif
-
         char *new_label;
         asprintf(&new_label, "call %s", $1->value);
         $$ = asd_new(new_label);
@@ -456,18 +367,9 @@ comando_simples_chamada_de_funcao
 lista_de_argumentos
     : %empty
     {
-        #ifdef DEBUG_MESSAGES
-            printf("> lista_de_argumentos: empty\n");
-        #endif
         $$ = NULL;
     }
     | lista_de_argumentos_separados_por_virgula
-    { 
-        #ifdef DEBUG_MESSAGES
-            printf("lista_de_argumentos_separados_por_virgula\n");
-        #endif
-        $$ = $1;
-    }
     ;
 
 lista_de_argumentos_separados_por_virgula
@@ -477,9 +379,6 @@ lista_de_argumentos_separados_por_virgula
     }
     | argumento ',' lista_de_argumentos_separados_por_virgula 
     {
-        #ifdef DEBUG_MESSAGES
-            printf(">argumento lista_de_argumentos_separados_por_virgula\n");
-        #endif
         asd_add_child($1, $3);
         $$ = $1;
     }
@@ -492,9 +391,6 @@ argumento
 comando_simples_comando_de_retorno
     : TK_PR_RETURN expressao TK_PR_AS tipo_da_variavel 
     {
-        #ifdef DEBUG_MESSAGES
-            printf("> TK_PR_RETURN expressao TK_PR_AS tipo_da_variavel\n");
-        #endif
         $$ = asd_new("return");
         asd_add_child($$, $2);
     }
@@ -510,10 +406,6 @@ comando_simples_comandos_de_controle_de_fluxo
 construcao_condicional
     : TK_PR_IF '(' expressao ')' bloco_de_comandos 
     {
-        #ifdef DEBUG_MESSAGES
-            printf("> if simples \n");
-            printf("> TK_PR_IF '(' expressao ')' bloco_de_comandos \n");
-        #endif
         $$ = asd_new("if");
         asd_add_child($$, $3);
         asd_add_child($$, $5);
@@ -523,11 +415,6 @@ construcao_condicional
 
     | TK_PR_IF '(' expressao ')' bloco_de_comandos TK_PR_ELSE bloco_de_comandos
     {
-        #ifdef DEBUG_MESSAGES
-            printf("> if com else \n");
-            printf("> TK_PR_IF '(' expressao ')' bloco_de_comandos TK_PR_ELSE bloco_de_comandos \n");
-        #endif
-
         $$ = asd_new("if");
         asd_add_child($$, $3);
         asd_add_child($$, $5);
@@ -540,9 +427,6 @@ construcao_condicional
 construcao_iterativa
     : TK_PR_WHILE '(' expressao ')' bloco_de_comandos 
     {
-        #ifdef DEBUG_MESSAGES
-            printf("> TK_PR_WHILE '(' expressao ')' bloco_de_comandos\n");
-        #endif
         $$ = asd_new("while");
         asd_add_child($$, $3);
         asd_add_child($$, $5);
@@ -563,11 +447,6 @@ expressao
 and
     : igual_naoigual
     | and '&' igual_naoigual {
-        #ifdef DEBUG_MESSAGES
-            printf(">&\n");
-            printf("%s\n", $1->label);
-            printf("%s\n", $3->label);
-        #endif
         $$ = asd_new("&");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
@@ -584,10 +463,6 @@ igual_naoigual
     }
     | igual_naoigual TK_OC_EQ maior_menor 
     {
-        #ifdef DEBUG_MESSAGES
-            printf("> igual_naoigual TK_OC_EQ maior_menor\n");
-            printf("%s\n", $3->label);
-        #endif
         $$ = asd_new("==");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
@@ -626,11 +501,6 @@ acumulacao
     : fator
     | acumulacao '+' fator
     {
-        #ifdef DEBUG_MESSAGES
-            printf("> acumulacao '+' fator\n");
-            printf("%s\n", $1->label);
-            printf("%s\n", $3->label);
-        #endif
         $$ = asd_new("+");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
@@ -647,11 +517,6 @@ fator
     : termo
     | fator '*' termo
     {
-        #ifdef DEBUG_MESSAGES
-            printf("> acumulacao '*' fator\n");
-            printf("%s\n", $1->label);
-            printf("%s\n", $3->label);
-        #endif
         $$ = asd_new("*");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
@@ -673,19 +538,11 @@ fator
 termo
     : operando
     | '(' expressao ')' {
-        #ifdef DEBUG_MESSAGES
-            printf(">'(' expressao ')'\n");
-            printf("%s\n", $2->label);
-        #endif
         $$ = $2;
 
     }
     | '+' termo
     {
-        #ifdef DEBUG_MESSAGES
-            printf(">'+' termo\n");
-            printf("%s\n", $2->label);
-        #endif
         $$ = asd_new("+");
         asd_add_child($$, $2);
 
@@ -693,10 +550,6 @@ termo
 
     | '-' termo
     {
-        #ifdef DEBUG_MESSAGES
-            printf(">'-' termo\n");
-            printf("%s\n", $2->label);
-        #endif
         $$ = asd_new("-");
         asd_add_child($$, $2);
 
@@ -704,10 +557,6 @@ termo
 
     | '!' termo
     {
-        #ifdef DEBUG_MESSAGES
-            printf(">'!' termo\n");
-            printf("%s\n", $2->label);
-        #endif
         $$ = asd_new("!");
         asd_add_child($$, $2);
 
@@ -720,11 +569,6 @@ operando
     comando_simples_chamada_de_funcao
     | TK_ID
     {
-        #ifdef DEBUG_MESSAGES
-            printf("> TK_ID\n");
-            printf("> %s\n", ($1));
-        #endif
-
         $$ = asd_new($1->value);
         svalor_lexico_free($1);
     }
@@ -732,22 +576,12 @@ operando
 
     | TK_LI_FLOAT
     {
-        #ifdef DEBUG_MESSAGES
-            printf("> TK_LI_FLOAT\n");
-            printf("> %s\n", ($1));
-        #endif
-
         $$ = asd_new($1->value);
         svalor_lexico_free($1);
     }
 
 
     | TK_LI_INT {
-        #ifdef DEBUG_MESSAGES
-            printf("> TK_LI_INT\n");
-            printf("> %s\n", ($1));
-        #endif
-
         $$ = asd_new($1->value);
         svalor_lexico_free($1);
     }
