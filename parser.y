@@ -167,7 +167,6 @@ variavel
 
 variavel_inicializavel
     :
-    
     declaracao_da_variavel
     {
         #ifdef DEBUG_MESSAGES
@@ -533,9 +532,11 @@ comando_simples_chamada_de_funcao
 
         char *new_label;
         asprintf(&new_label, "call %s", $1->value);
-
         $$ = asd_new(new_label);
-        asd_add_child($$, $3);
+
+        // lista de argumentos pode ser vazio
+        if ($3 != NULL)
+            asd_add_child($$, $3);
 
         svalor_lexico_free($1);
         free(new_label);
@@ -546,9 +547,9 @@ lista_de_argumentos
     : %empty
         {
         #ifdef DEBUG_MESSAGES
-            printf("> empty\n");
+            printf("> lista_de_argumentos: empty\n");
         #endif
-        $$ = asd_new("larg empty");
+        $$ = NULL;
     }
     | lista_de_argumentos_separados_por_virgula
     { 
@@ -567,7 +568,7 @@ lista_de_argumentos_separados_por_virgula
     | argumento ',' lista_de_argumentos_separados_por_virgula 
     {
         #ifdef DEBUG_MESSAGES
-            printf("> lista_de_argumentos_separados_por_virgula argumento\n");
+            printf(">argumento lista_de_argumentos_separados_por_virgula\n");
         #endif
 
         // since the node can have children, as it can be
