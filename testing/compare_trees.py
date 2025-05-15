@@ -8,12 +8,23 @@ class TreeNode:
         self.label = label
         self.children = []
 
-    def __eq__(self, other):
+    def equals(self, other, ordered=True):
         if not isinstance(other, TreeNode):
             return False
-        return (self.label == other.label and
-                len(self.children) == len(other.children) and
-                all(c1 == c2 for c1, c2 in zip(self.children, other.children)))
+        if self.label != other.label or len(self.children) != len(other.children):
+            return False
+        if ordered:
+            return all(c1.equals(c2, ordered=True) for c1, c2 in zip(self.children, other.children))
+        else:
+            unmatched = other.children[:]
+            for child in self.children:
+                for i, o_child in enumerate(unmatched):
+                    if child.equals(o_child, ordered=False):
+                        del unmatched[i]
+                        break
+                else:
+                    return False
+            return True
 
 def parse_dot_file(filepath):
     with open(filepath, 'r') as f:
@@ -50,7 +61,7 @@ def parse_dot_file(filepath):
 def compare_trees(file1, file2):
     tree1 = parse_dot_file(file1)
     tree2 = parse_dot_file(file2)
-    return tree1 == tree2
+    return tree1.equals(tree2, ordered=False)
 
 # Example usage:
 if __name__ == "__main__":
