@@ -1,0 +1,5 @@
+f returns int is[
+    declare a as int
+    declare b as int
+    a is -b
+];

@@ -1,0 +1,4 @@
+main returns int is [
+  x is a * f() - g(h()-2)
+];
+

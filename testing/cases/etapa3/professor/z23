@@ -1,0 +1,12 @@
+f returns int is[
+    declare a as int
+    declare b as int
+    declare c as int
+    if (a) [
+       a is b
+     ]else[
+       a is 3
+     ]
+     c is 4
+     c is 5
+];

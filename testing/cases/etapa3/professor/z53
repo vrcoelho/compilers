@@ -1,0 +1,5 @@
+f returns int is
+[
+  declare b as int with 10
+  declare a as int with 30
+];

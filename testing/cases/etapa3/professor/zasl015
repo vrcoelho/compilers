@@ -1,0 +1,5 @@
+main returns int is [
+  declare a as int
+  a is 12 & 1
+  return 0 as int
+];

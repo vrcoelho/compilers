@@ -1,0 +1,4 @@
+f returns int is
+[
+  z is a <= b == c != d > e
+];

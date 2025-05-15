@@ -1,0 +1,7 @@
+f returns int is[
+    declare a as int
+    declare b as int
+    declare c as int
+    declare d as int
+    a is b * c * d
+];

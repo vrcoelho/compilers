@@ -1,0 +1,6 @@
+main returns int is [
+  declare a as int
+  declare b as int
+  a is 2 + b
+  return b as int
+];

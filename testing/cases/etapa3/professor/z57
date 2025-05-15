@@ -1,0 +1,7 @@
+fa returns int with k as float, l as int is
+[
+  declare va as int
+  declare a as int
+  declare vc as int
+];
+

@@ -1,0 +1,12 @@
+f returns int is
+[
+  declare a as int
+  declare b as float
+  a is b
+  declare c as int
+  declare d as float with 3.0
+  declare e as int
+  c is d
+  declare g as int
+  return a as int
+];

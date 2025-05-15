@@ -1,0 +1,10 @@
+f returns int is
+[
+  declare a as int
+  declare b as float
+  declare c as int with 3
+  declare d as float
+  declare e as int with 4
+  a is 3
+  return 10 as int
+];

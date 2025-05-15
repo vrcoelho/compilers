@@ -1,0 +1,8 @@
+g returns int with i as int, j as int, k as int is [
+],
+f returns int is[
+    declare a as int
+    declare b as int
+    declare c as int
+    g(a, b, c)
+];

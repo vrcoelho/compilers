@@ -1,0 +1,4 @@
+f returns int is
+[
+  if (a+b*c <= 10) [ ]
+];

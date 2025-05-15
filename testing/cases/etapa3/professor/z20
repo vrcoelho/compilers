@@ -1,0 +1,6 @@
+f returns int is[
+    declare i as int
+    while(i) [
+    	i is 2
+    ]
+];

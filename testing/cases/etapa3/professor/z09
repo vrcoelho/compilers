@@ -1,0 +1,8 @@
+g returns int is [
+  declare v as int
+],
+f returns int is [
+  declare b as int
+  declare z as int
+  declare k as int
+];

@@ -1,0 +1,7 @@
+fa returns int is[
+    declare a as int
+    a is 1
+    a is 2
+    a is 3
+    a is 4
+];

@@ -1,0 +1,5 @@
+f returns int with c as int is
+[
+  declare a as int
+  c is 3 * f(a) + a
+];

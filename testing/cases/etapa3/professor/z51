@@ -1,0 +1,5 @@
+k returns int with x as int, y as int, z as int is [],
+//f returns int is[
+//        k(10+11, 20+21, 30+31)
+//],
+declare x as int;

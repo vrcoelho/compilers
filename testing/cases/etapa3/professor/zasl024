@@ -1,0 +1,5 @@
+declare x as int,
+f2 returns int is [],
+declare y as int,
+f1 returns int is [],
+declare z as int;

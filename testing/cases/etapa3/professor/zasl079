@@ -1,0 +1,3 @@
+main returns int is [
+  declare  x as int with 2
+];

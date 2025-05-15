@@ -1,0 +1,22 @@
+f returns int is[
+   declare a as int
+   declare x as int
+   declare b as int
+   declare c as int
+   declare y as int
+   declare d as int
+   declare e as int
+   declare f as int
+   declare z as int
+   declare g as int
+   declare h as int
+   declare i as int
+   declare w as int
+   declare j as int
+   declare k as int
+   declare l as int
+   x is a + b * c
+   y is d / e - f
+   z is (g + h) * i
+   w is j / (k - l)
+];
