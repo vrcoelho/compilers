@@ -4,6 +4,7 @@
 // #include "tokens.h"
 #include "asd.h"
 #include "parser.tab.h"
+#include "internals.h"
 #include <stdlib.h>
 
 int get_line_number(void);

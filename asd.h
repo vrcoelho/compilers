@@ -8,19 +8,6 @@ typedef struct asd_tree
   struct asd_tree **children;
 } asd_tree_t;
 
-typedef struct svalor_lexico
-{
-  int line_number;
-  char *token_type;
-  char *value;
-} svalor_lexico_st;
-
-svalor_lexico_st *svalor_lexico_new(
-    int line_number,
-    const char *token_type,
-    const char *value);
-
-void svalor_lexico_free(svalor_lexico_st *v);
 
 /*
  * Função asd_new, cria um nó sem filhos com o label informado.

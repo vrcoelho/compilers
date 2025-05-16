@@ -2,8 +2,9 @@
 /*00219819 - MARIANA KOPPE PIERUCCI
  00243463 - VANESSA RIGHI COELHO*/
 #include <stdio.h>
-#include "asd.h"
 #include <string.h>
+#include "asd.h"
+#include "internals.h"
 
 int yylex(void);
 void yyerror (char const *mensagem);

@@ -7,10 +7,10 @@ parser.tab.c parser.tab.h: parser.y
 lex.yy.c: scanner.l
 	flex scanner.l
 
-lex.yy.o: lex.yy.c parser.tab.h
+lex.yy.o: lex.yy.c parser.tab.h internals.h
 	gcc $(CFLAGS) -c lex.yy.c
 
-main.o: main.c parser.tab.h asd.h
+main.o: main.c parser.tab.h asd.h internals.h
 	gcc $(CFLAGS) -c main.c
 
 clean:
@@ -31,11 +31,11 @@ package2:
 	tar cvzf etapa2.tgz etapa2 *.c *.h *.y scanner.l Makefile
 
 # === Etapa 3 ===
-etapa3: parser.tab.o lex.yy.o main.o asd.o
-	gcc $(CFLAGS) -o etapa3 parser.tab.o lex.yy.o main.o asd.o
+etapa3: parser.tab.o lex.yy.o main.o asd.o internals.o
+	gcc $(CFLAGS) -o etapa3 parser.tab.o lex.yy.o main.o asd.o internals.o
 
 package3:
-	tar cvzf etapa3.tgz Makefile asd.* *.y *.l main.c tokens.h
+	tar cvzf etapa3.tgz Makefile asd.c asd.h internals.c internals.h *.y *.l main.c tokens.h
 
 # === usado pelo professor ===
 # === etapa atual
