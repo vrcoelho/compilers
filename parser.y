@@ -153,7 +153,6 @@ variavel
         asd_free($1);
         $$ = NULL;
     }
-
 ;
 
 variavel_inicializavel
@@ -202,7 +201,7 @@ variavel_inicializacao
         );
         asd_free($2);
     }
-    ;
+;
 
 tipo_inicializacao
     : TK_LI_INT
@@ -258,22 +257,19 @@ lista_de_parametros_que_pode_ser_vazia
 ;
 
 lista_wrapper
-    :
-    TK_PR_WITH lista_de_parametros 
+    : TK_PR_WITH lista_de_parametros 
     {
         $$ = $2;
     }
 ;
 
 lista_de_parametros
-    :
-    decl
+    : decl
     | lista_de_parametros ',' decl
 ;
 
 decl
-    :
-    TK_ID TK_PR_AS tipo_de_parametro 
+    : TK_ID TK_PR_AS tipo_de_parametro 
     {
         svalor_lexico_free($1);
     }
@@ -289,7 +285,6 @@ bloco_de_comandos
         // even if its null
         $$ = $2;
     }
-
 ;
 
 
@@ -298,7 +293,6 @@ sequencia_de_comandos_simples_possivelmente_vazia
     {
         $$ = NULL;
     }
-
     | sequencia_de_comandos_simples 
 ;
 
@@ -381,7 +375,7 @@ lista_de_argumentos
         $$ = NULL;
     }
     | lista_de_argumentos_separados_por_virgula
-    ;
+;
 
 lista_de_argumentos_separados_por_virgula
     : argumento
@@ -421,10 +415,7 @@ construcao_condicional
         asd_add_child($$, $3);
         if ($5 != NULL)
             asd_add_child($$, $5);
-
     }
-
-
     | TK_PR_IF '(' expressao ')' bloco_de_comandos TK_PR_ELSE bloco_de_comandos
     {
         $$ = asd_new("if");
@@ -434,10 +425,8 @@ construcao_condicional
         if ($7 != NULL)
             asd_add_child($$, $7);
     }
-
 ;
 
-// while
 construcao_iterativa
     : TK_PR_WHILE '(' expressao ')' bloco_de_comandos 
     {
@@ -447,7 +436,6 @@ construcao_iterativa
             asd_add_child($$, $5);
     }
 ;
-
 
 expressao
     : and
@@ -562,14 +550,12 @@ termo
         asd_add_child($$, $2);
 
     }
-
     | '-' termo
     {
         $$ = asd_new("-");
         asd_add_child($$, $2);
 
     }
-
     | '!' termo
     {
         $$ = asd_new("!");
@@ -578,24 +564,18 @@ termo
     }
 ;
 
-
 operando
-    : 
-    comando_simples_chamada_de_funcao
+    : comando_simples_chamada_de_funcao
     | TK_ID
     {
         $$ = asd_new($1->value);
         svalor_lexico_free($1);
     }
-
-
     | TK_LI_FLOAT
     {
         $$ = asd_new($1->value);
         svalor_lexico_free($1);
     }
-
-
     | TK_LI_INT {
         $$ = asd_new($1->value);
         svalor_lexico_free($1);
@@ -614,17 +594,29 @@ void yyerror (char const *s) {
 
     if (yychar >= 0)
     {
-        fprintf(stderr, "Erro na linha %d: %s. Token atual: '%s'",
-                yylineno, s, yytext);
+        fprintf(
+            stderr,
+            "Erro na linha %d: %s. Token atual: '%s'",
+            yylineno,
+            s,
+            yytext
+        );
 
         if (yychar < (sizeof(yytname) / sizeof(yytname[0])) )
-            fprintf(stderr, " (%s)", 
-            yytname[yychar]);
+            fprintf(
+                stderr,
+                " (%s)",
+                yytname[yychar]
+            );
 
         printf("\n");
     }
 
     else
-        fprintf(stderr, "Erro na linha %d: %s. Token atual: <EOF or invalid>\n",
-                yylineno, s);
+        fprintf(
+            stderr,
+            "Erro na linha %d: %s. Token atual: <EOF or invalid>\n",
+            yylineno,
+            s
+        );
 }
