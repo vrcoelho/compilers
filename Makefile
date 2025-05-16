@@ -34,6 +34,9 @@ package2:
 etapa3: parser.tab.o lex.yy.o main.o asd.o
 	gcc $(CFLAGS) -o etapa3 parser.tab.o lex.yy.o main.o asd.o
 
+package3:
+	tar cvzf etapa3.tgz Makefile asd.* *.y *.l main.c tokens.h
+
 # === usado pelo professor ===
 # === etapa atual
 all: etapa3
