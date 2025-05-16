@@ -71,6 +71,7 @@ DEFINICAO DE TOKENS
 %type <node> cabecalho
 %type <node> corpo
 %type <node> sequencia_de_comandos_simples_possivelmente_vazia
+%type <node> elemento
 %type <node> lista_de_elementos
 %type <node> variavel
 %type <node> nome_da_funcao
@@ -114,14 +115,10 @@ lista_de_elementos_wrapper
 ;
 
 lista_de_elementos
-    : variavel    
-    | funcao    
+    : elemento
+    | elemento ',' lista_de_elementos
     {
-        $$ = $1;
-    } 
-    | variavel ',' lista_de_elementos    
-    {
-        // ambas variavel e lista_de_elementos podem ser
+        // ambos elemento e lista_de_elementos podem ser
         // vazias pois nao incluo as decls
         if (($1 != NULL) && ($3 != NULL))
             asd_add_child($1, $3);
@@ -131,19 +128,11 @@ lista_de_elementos
         else if ($3 != NULL)
             $$ = $3;
     }
-    | funcao ',' lista_de_elementos      
-    {
-        // ambas variavel e lista_de_elementos podem ser
-        // vazias pois nao incluo as decls
-        if (($1 != NULL) && ($3 != NULL))
-            asd_add_child($1, $3);
+;
 
-        if ($1 != NULL)
-            $$ = $1;
-        else if ($3 != NULL)
-            $$ = $3;
-    } 
-   
+elemento
+    : variavel
+    | funcao
 ;
 
 // variaveis
