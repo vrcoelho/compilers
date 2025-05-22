@@ -50,11 +50,32 @@ element_symbol_table* new_entry_function(
     int nargs, 
     type_of_element * argslist);
 
-void free_entry_st(element_symbol_table* st);
 
 
 void insert_to_table(
     root_symbol_table* table_root,
     element_symbol_table* element);
 
+
+
+
+
+
+
+// really used functions
+
+void free_entry_st(element_symbol_table* st);
+    
 void print_table(root_symbol_table* table_root);
+
+root_symbol_table* new_symbol_table();
+void free_symbol_table_contents(root_symbol_table* table_root);
+
+element_symbol_table* new_entry_variable2(
+    const char* name,
+    int type_of_variable);
+
+void register_variable_to_tableofc(
+    root_symbol_table* table_root,
+    const char* variable_name,
+    int variable_type);

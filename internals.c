@@ -37,6 +37,8 @@ void svalor_lexico_free(svalor_lexico_st *v)
 
 
 
+// added functions
+
 
 
 element_symbol_table* new_entry_variable(const char* name) {
@@ -83,15 +85,7 @@ element_symbol_table* new_entry_function(
     return p;
 }
 
-void free_entry_st(element_symbol_table* st) {
-    if (st == NULL) {
-        // error?
-        return;
-    }
-    // check if its null?
-    free(st->name);
-    // free(st->parameters_list);
-}
+
 
 // ===========================
 
@@ -103,6 +97,11 @@ void free_entry_st(element_symbol_table* st) {
 // and a pointer to its parent table? 
 //   |-> not sure we actually need it
 //   |-> because we will have a `stack` with pointers to the tables
+
+
+
+
+
 
 
 
@@ -139,6 +138,25 @@ void insert_to_table(
 }
 
 
+
+
+
+
+
+
+
+// currently used functions
+
+void free_entry_st(element_symbol_table* st) {
+    if (st == NULL) {
+        // error?
+        return;
+    }
+    // check if its null?
+    free(st->name);
+    // free(st->parameters_list);
+}
+
 void print_table(root_symbol_table* table_root)
 {
     element_symbol_table* nextp = table_root->header;
@@ -153,21 +171,42 @@ void print_table(root_symbol_table* table_root)
 }
 
 
+// new functions
+root_symbol_table* new_symbol_table() {
+    root_symbol_table*  table = NULL;
+    table = calloc(1, sizeof(root_symbol_table));
+    if (table == NULL) {
+        // error? so what? end of the world?
+    }
+    return table;
+}
 
 
+void free_symbol_table_contents(root_symbol_table* table_root) {
+    if (table_root->header == NULL ) { 
+        // error? print something?
+        return;
+    }
 
+    element_symbol_table* curr;
+    element_symbol_table* next;
+    curr = table_root->header;
+    next = curr->next;
+    int finished = 0;
+    while (!finished) {        
+        free_entry_st(curr);
+        free(curr);
 
+        if (next == NULL)
+            finished = 1;
+        else
+        {
+            curr = next;
+            next = curr->next;
+        }
+    }
 
-
-
-
-
-
-
-
-
-
-
+}
 
 element_symbol_table* new_entry_variable2(
     const char* name,
@@ -192,6 +231,11 @@ void register_variable_to_tableofc(
     root_symbol_table* table_root,
     const char* variable_name,
     int variable_type) {
+
+    if (table_root == NULL ) { 
+        // error because we need a valid pointer
+        return;
+    }
 
     if (table_root->header == NULL ) { 
         table_root->header = new_entry_variable2(variable_name, variable_type);

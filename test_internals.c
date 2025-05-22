@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include "internals.h"
 
-
-
 int main() {
     // como vai ser o teste?
     // vou criar uma entrada
@@ -61,6 +59,30 @@ int main() {
     free_entry_st(v);
     free(v);
 
+
+
+    root_symbol_table* table = new_symbol_table();
+
+    char newfuncname[] = "iamfunction";
+    int functype = 1;
+
+
+    register_variable_to_tableofc(table, newfuncname, functype);
+
+
+
+    char newfuncname2[] = "second_function";
+    int functype2 = 0;
+    register_variable_to_tableofc(table, newfuncname2, functype2);
+
+
+    print_table(table);
+
+    printf("%s\n", "hello");
+
+    free_symbol_table_contents(table);
+    free(table);
+    // new testing
 
     return 0;
 }
