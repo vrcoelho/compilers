@@ -3,7 +3,7 @@ CFLAGS += -fsanitize=address
 
 # === usado pelo professor ===
 # === etapa atual
-all: etapa3
+all: etapa4
 
 parser.tab.c parser.tab.h: parser.y
 	bison -d -v --report=all parser.y
@@ -44,4 +44,7 @@ package3:
 # === Etapa 4 ===
 etapa4: parser.tab.o lex.yy.o main.o asd.o internals.o
 	gcc $(CFLAGS) -o etapa4 parser.tab.o lex.yy.o main.o asd.o internals.o
+
+package4:
+	tar cvzf etapa4.tgz Makefile asd.c asd.h internals.c internals.h *.y *.l main.c tokens.h errors.h
 
