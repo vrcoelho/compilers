@@ -3,13 +3,20 @@
  00243463 - VANESSA RIGHI COELHO*/
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "asd.h"
 #include "internals.h"
+#include "errors.h"
 
 int yylex(void);
 void yyerror (char const *mensagem);
 extern int get_line_number(void);
 extern asd_tree_t *arvore;
+
+extern stack_symbol_table* stack_of_tables;
+extern int n_args;
+extern int n_args_on_call;
+
 %}
 %debug
 
@@ -85,6 +92,8 @@ DEFINICAO DE TOKENS
 %type <node> lista_de_argumentos_separados_por_virgula
 %type <node> variavel_inicializacao
 %type <node> tipo_inicializacao
+
+%type <intval> tipo_da_variavel
 
 %%
 
@@ -171,14 +180,41 @@ declaracao_da_variavel
         // colocando apenas o nome
         $$ = asd_new($2->value);
         // free o nome da variavel, no label
+        
+
+        // actually I need to check if variable name does not
+        // already exists
+        int r = search_name_taken_on_stack(stack_of_tables, $2->value);
+        if (r == 1)
+        {
+            // then it was already declared either
+            // as a variable or a function
+            free_stack_and_all_tables(stack_of_tables);
+            declared_error_message($2->value);
+            svalor_lexico_free($2);
+            exit(ERR_DECLARED);
+        }
+
+        // if not used yet, we register to the current table
+        register_variable_to_tableofc(
+            stack_of_tables->current_table, 
+            $2->value, 
+            $4);     
+
         svalor_lexico_free($2);
-     }
+    }
 ;
 
 
 tipo_da_variavel
     : TK_PR_INT
+    {
+        $$ = integer;
+    }
     | TK_PR_FLOAT
+    {
+        $$ = floatpoint;
+    }
 ;
 
 
@@ -219,14 +255,54 @@ funcao
 
 corpo
     : bloco_de_comandos
+    {
+        // we created the scope from the function def
+        // and can free after the body was parsed
+        free_current_table(stack_of_tables);
+    }
 ;
 
 
 cabecalho
-    : nome_da_funcao TK_PR_RETURNS tipo_da_variavel
+    :
+    { 
+        n_args = 0;
+    }
+     nome_da_funcao TK_PR_RETURNS tipo_da_variavel
      lista_de_parametros_que_pode_ser_vazia TK_PR_IS
     {
-        $$ = $1;
+
+        // ATTENTION INCLUDING THAT RULE ON TOP,
+        // SHIFT ALL INDEXES BY ONE
+
+        // $$ = $1;
+        $$ = $2;
+
+        int r = search_name_taken_on_stack(stack_of_tables, $2->label);
+        if (r == 1)
+        {
+            // then it was already declared either
+            // as a variable or a function
+            free_stack_and_all_tables(stack_of_tables);
+            printf("ERR_DECLARED\n");
+            exit(ERR_DECLARED);
+        }
+
+        // temos que colocar a funcao na tabela
+        register_function_to_tableofc(
+            stack_of_tables->current_table,
+            // $1->label,
+            // $3,
+            $2->label,
+            $4,
+            n_args
+        );
+
+        // criar nova tabela de escopo
+        root_symbol_table* func_table = new_symbol_table();
+        register_table_to_stack(stack_of_tables, func_table);
+
+        n_args = -1;
     }
 ;
 
@@ -261,6 +337,9 @@ lista_de_parametros
 decl
     : TK_ID TK_PR_AS tipo_de_parametro 
     {
+
+        n_args++;
+
         svalor_lexico_free($1);
     }
 ;
@@ -338,22 +417,113 @@ comando_simples_comando_de_atribuicao
             asd_new($1->value)
         );
         asd_add_child($$, $3);
+
+
+        // we need to check if the variable was declared before
+        // so it must exist on the current table or before
+        int r = search_variable_on_stack(
+            stack_of_tables,
+            $1->value);
+
+        // it was actually a function!
+        if (r == 3) {
+            // Enfim, caso o identificador dito função 
+            // seja utilizado como variável, deve-se lançar
+            // o erro ERR_FUNCTION
+            function_error_message($1->value);
+            svalor_lexico_free($1);
+            free_stack_and_all_tables(stack_of_tables);
+            exit(ERR_FUNCTION);
+        }
+
+        // not found
+        if (r == -1)
+        {
+            undeclared_error_message($1->value);
+            svalor_lexico_free($1);
+            free_stack_and_all_tables(stack_of_tables);
+            exit(ERR_UNDECLARED);
+        }
+
         svalor_lexico_free($1);
     }
 ;
 
 // chamada de funcao
 comando_simples_chamada_de_funcao
-    : TK_ID'(' lista_de_argumentos')' 
+    : 
+    TK_ID {n_args_on_call = 0;}  '(' lista_de_argumentos')' 
     {
+        // ADDING THE NEW ACTION ON TOP
+        // SHIFTS THE INDEX BY ONE AFTER THE FIRST
         char *new_label;
+
         asprintf(&new_label, "call %s", $1->value);
+
         $$ = asd_new(new_label);
 
         // lista de argumentos pode ser vazio
-        if ($3 != NULL)
-            asd_add_child($$, $3);
 
+        // if ($3 != NULL)
+        //     asd_add_child($$, $3);
+        if ($4 != NULL)
+            asd_add_child($$, $4);
+
+        int received_args = n_args_on_call;
+
+        // well we do need to check if the function exists
+        int r = search_function_on_stack(
+            stack_of_tables,
+            $1->value
+        );
+        // it was a variable!
+        if (r == 5) {
+            // we are calling a variable as a function
+            // Caso o identificador dito variável seja 
+            // usado como uma função, deve-se lançar o
+            // erro ERR_VARIABLE
+
+
+            variable_error_message($1->value);
+            svalor_lexico_free($1);
+            free_stack_and_all_tables(stack_of_tables);
+
+            // tenho q dar free em todas as tabelas q ja aloquei
+
+            exit(ERR_VARIABLE);
+
+        }
+        else if (r == 1)
+        {
+            // we did found and it was indeed a function
+            // but we now must check the number of args
+            int argsok = check_args_function_on_stack(
+                stack_of_tables,
+                $1->value,
+                received_args
+            );
+
+            if (argsok == 11) // too few
+            {
+                missing_args_error_message($1->value);
+                svalor_lexico_free($1);
+                free_stack_and_all_tables(stack_of_tables);
+                exit(ERR_MISSING_ARGS);
+            } else if (argsok == 22) // too much
+            {
+                excess_args_error_message($1->value);
+                svalor_lexico_free($1);
+                free_stack_and_all_tables(stack_of_tables);
+                exit(ERR_EXCESS_ARGS);
+            }                
+
+        } 
+        else {
+            undeclared_error_message($1->value);
+            svalor_lexico_free($1);
+            free_stack_and_all_tables(stack_of_tables);
+            exit(ERR_UNDECLARED);
+        }
         svalor_lexico_free($1);
         free(new_label);
     }
@@ -381,6 +551,11 @@ lista_de_argumentos_separados_por_virgula
 
 argumento
     : expressao
+    {
+        // to be able to count how many args we
+        // passed to the function call
+        n_args_on_call++;
+    }
 ;
 
 comando_simples_comando_de_retorno
@@ -609,4 +784,47 @@ void yyerror (char const *s) {
             yylineno,
             s
         );
+}
+
+
+// custom error messages
+
+void undeclared_error_message(char* token_name) {
+    extern int yylineno;
+    printf("Erro %d: identificador %s foi utilizado sem ter sido declarado na linha %d\n", 
+        ERR_UNDECLARED, 
+        token_name,
+        yylineno);
+}
+
+void declared_error_message(char* token_name) {
+    extern int yylineno;
+    printf("Erro %d: identificador %s redeclarado na linha %d\n", 
+        ERR_DECLARED,
+        token_name,
+        yylineno);
+}
+
+void variable_error_message(char* token_name) {
+    extern int yylineno;
+    printf("Erro %d: variavel %s foi utilizada como funcao na linha %d\n", 
+        ERR_VARIABLE, token_name, yylineno);
+}
+
+void function_error_message(char* token_name) {
+    extern int yylineno;
+    printf("Erro %d: funcao %s foi utilizada como uma variavel na linha %d\n", 
+        ERR_FUNCTION, token_name, yylineno);
+}
+
+void missing_args_error_message(char* token_name) {
+    extern int yylineno;
+    printf("Erro %d: funcao %s chamada com argumentos faltando na linha %d\n", 
+        ERR_MISSING_ARGS, token_name, yylineno);
+}
+
+void excess_args_error_message(char* token_name) {
+    extern int yylineno;
+    printf("Erro %d: funcao %s chamada com excesso de argumentos na linha %d\n", 
+        ERR_EXCESS_ARGS, token_name, yylineno);
 }
