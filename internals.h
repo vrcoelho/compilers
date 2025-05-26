@@ -13,10 +13,8 @@ svalor_lexico_st *svalor_lexico_new(
 void svalor_lexico_free(svalor_lexico_st *v);
 
 
-// we need a new structure
-
-typedef enum {variable, function} variable_or_function;
-typedef enum {integer, floatpoint} type_of_element;
+typedef enum {variable = 55, function = 66} variable_or_function;
+typedef enum {integer = 77, floatpoint = 88} type_of_element;
 
 typedef struct element_symbol_table_st
 {
@@ -42,27 +40,31 @@ typedef struct root_symbol_table_st
 {
     // points to the next symbol
     struct element_symbol_table_st* header;
+    struct root_symbol_table_st* mother_table;
+    struct root_symbol_table_st* next_table;
 } root_symbol_table;
 
+
+typedef struct stack_symbol_table_st {
+    struct root_symbol_table_st* first_table;
+    struct root_symbol_table_st* current_table;
+} stack_symbol_table;
+
+
+
+// probably should remove by now
 element_symbol_table* new_entry_variable(const char* name);
+
 element_symbol_table* new_entry_function(
     const char* name, 
     int nargs, 
     type_of_element * argslist);
-
-
 
 void insert_to_table(
     root_symbol_table* table_root,
     element_symbol_table* element);
 
 
-
-
-
-
-
-// really used functions
 
 void free_entry_st(element_symbol_table* st);
     
@@ -79,3 +81,71 @@ void register_variable_to_tableofc(
     root_symbol_table* table_root,
     const char* variable_name,
     int variable_type);
+
+void register_function_to_tableofc(
+    root_symbol_table* table_root,
+    const char* name, 
+    int return_type,
+    int nargs);
+
+stack_symbol_table* new_stack_of_tables();
+void register_table_to_stack(
+    stack_symbol_table* stack, 
+    root_symbol_table* table    
+);
+
+void print_stack_of_tables( stack_symbol_table* stack);
+
+
+int search_variable_on_table(
+    root_symbol_table* table,
+    const char* varname
+);
+
+int search_variable_on_stack(
+    stack_symbol_table* stack_of_tables,
+    const char* varname
+);
+
+
+void free_current_table(
+    stack_symbol_table* stack );
+
+int free_stack_and_all_tables(
+    stack_symbol_table* stack_of_tables
+);
+
+
+int search_function_on_table(
+    root_symbol_table* table,
+    const char* funcName
+);
+
+int search_function_on_stack(
+    stack_symbol_table* stack_of_tables,
+    const char* funcName
+);
+
+
+int check_args_function_on_table(
+    root_symbol_table* table,
+    const char* funcName,
+    int received_args
+);
+
+int check_args_function_on_stack(
+    stack_symbol_table* stack_of_tables,
+    const char* funcName,
+    int received_args
+) ;
+
+
+int search_name_taken_on_table(
+    root_symbol_table* table,
+    const char* name
+);
+
+int search_name_taken_on_stack(
+    stack_symbol_table* stack_of_tables,
+    const char* name
+);
