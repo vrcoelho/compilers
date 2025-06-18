@@ -13,6 +13,20 @@
 ok=0
 err=0
 
+get_expected_return() {
+    case "$1" in
+        "//ERR_UNDECLARED") echo 10 ;;
+        "//ERR_DECLARED") echo 11 ;;
+        "//ERR_VARIABLE") echo 20 ;;
+        "//ERR_FUNCTION") echo 21 ;;
+        "//ERR_WRONG_TYPE") echo 30 ;;
+        "//ERR_MISSING_ARGS") echo 40 ;;
+        "//ERR_EXCESS_ARGS") echo 41 ;;
+        "//ERR_WRONG_TYPE_ARGS") echo 42 ;;
+        *) echo 1 ;; # default case
+    esac
+}
+
 for case in ./gabarito/cases/q*
 do
     filename=$(basename "$case")
@@ -20,34 +34,7 @@ do
 
         return_expected=1 
         line=$(head -n 1 "$case")
-        case "$line" in
-            "//ERR_UNDECLARED")
-                return_expected=10
-                ;; 
-            "//ERR_DECLARED")
-                return_expected=11
-                ;;
-            "//ERR_VARIABLE")
-                return_expected=20
-                ;;
-            "//ERR_FUNCTION")
-                return_expected=21
-                ;;
-            "//ERR_WRONG_TYPE")
-                return_expected=30
-                ;;
-            "//ERR_MISSING_ARGS")
-                return_expected=40
-                ;;
-            "//ERR_EXCESS_ARGS")
-                return_expected=41
-                ;;
-            "//ERR_WRONG_TYPE_ARGS")
-                return_expected=42
-                ;;
-        esac
-
-         
+        return_expected=$(get_expected_return $line)         
        
         touch ./cases/etapa4/results/"$filename"
         > ./cases/etapa4/results/"$filename"
