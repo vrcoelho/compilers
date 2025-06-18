@@ -358,10 +358,11 @@ void print_stack_of_tables( stack_symbol_table* stack) {
 
     root_symbol_table* curr_table = stack->first_table;
     while(curr_table != NULL) { 
+        printf("---\n");
         print_table(curr_table);
         curr_table = curr_table->next_table;
     } 
-    
+    printf("---end of print_stack_of_tables---\n");
 
 }
 
