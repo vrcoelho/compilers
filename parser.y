@@ -113,7 +113,7 @@ DEFINICAO DE TOKENS
 %type <node> variavel_inicializacao
 %type <node> tipo_inicializacao
 
-%type <intval> tipo_da_variavel
+%type <intval> tipo_da_variavel tipo_de_parametro
 
 %%
 
@@ -358,6 +358,33 @@ decl
     : TK_ID TK_PR_AS tipo_de_parametro 
     {
 
+        // aqui eu tambem deveria declarar o parametro
+        // e checar se ele ja existe
+
+        // TODO REFACTOR
+        // copiado da parte da declaracao_da_variavel
+         // actually I need to check if variable name does not
+        // already exists
+        int r = search_name_taken_on_stack(stack_of_tables, $1->value);
+        if (r == 1)
+        {
+            // then it was already declared either
+            // as a variable or a function
+            free_stack_and_all_tables(stack_of_tables);
+            declared_error_message($1->value);
+            svalor_lexico_free($1);
+            exit(ERR_DECLARED);
+        }
+
+        // if not used yet, we register to the current table
+        register_variable_to_tableofc(
+            stack_of_tables->current_table, 
+            $1->value, 
+            $3);
+        // copiado da parte da declaracao_da_variavel
+        // TODO REFACTOR
+
+        // contagem do numero de args
         n_args++;
 
         svalor_lexico_free($1);
@@ -366,7 +393,13 @@ decl
 
 tipo_de_parametro
     : TK_PR_INT
+    {
+        $$ = integer;
+    }
     | TK_PR_FLOAT
+    {
+        $$ = floatpoint;
+    }
 ;
 
 bloco_de_comandos
