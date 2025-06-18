@@ -396,7 +396,8 @@ int search_variable_on_table(
             // the name matches
             // was it really a variable?
             if (curr->type_of_element == variable)
-                return 1;
+                // return 1;
+                return curr->type_or_return;
             else
                 return 3;
         }
@@ -426,7 +427,8 @@ int search_variable_on_stack(
     int i = 1;
     while(curr_table != NULL) {
         int r = search_variable_on_table(curr_table, varname);
-        if (r == 1 | r == 3)
+        if (r == 1 | r == 3 | r > 70)
+            // integer = 77, floatpoint = 88
             return r;
         i++;
         curr_table = curr_table->mother_table;

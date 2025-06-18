@@ -149,3 +149,6 @@ int search_name_taken_on_stack(
     stack_symbol_table* stack_of_tables,
     const char* name
 );
+
+
+int check_type_compatibility(int a_type, int b_type);

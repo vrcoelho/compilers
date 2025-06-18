@@ -6,6 +6,9 @@ typedef struct asd_tree
   char *label;
   int number_of_children;
   struct asd_tree **children;
+
+  int node_type;
+
 } asd_tree_t;
 
 

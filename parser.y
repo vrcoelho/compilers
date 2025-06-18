@@ -513,6 +513,10 @@ comando_simples_comando_de_atribuicao
             exit(ERR_UNDECLARED);
         }
 
+        // now we must check if the expression is compatible
+        // r = type from the searched (and found!) variable
+        check_type_compatibility(r, $3->node_type);
+
         svalor_lexico_free($1);
     }
 ;
@@ -632,6 +636,11 @@ argumento
 comando_simples_comando_de_retorno
     : TK_PR_RETURN expressao TK_PR_AS tipo_da_variavel 
     {
+
+        check_type_compatibility(
+            $2->node_type,
+            $4
+        );
         $$ = asd_new("return");
         asd_add_child($$, $2);
     }
@@ -677,18 +686,22 @@ expressao
     : and
     | expressao '|' and
     {
+        check_type_compatibility($1->node_type, $3->node_type);
         $$ = asd_new("|");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
+        $$->node_type = $1->node_type;
     }
 ;
 
 and
     : igual_naoigual
     | and '&' igual_naoigual {
+        check_type_compatibility($1->node_type, $3->node_type);
         $$ = asd_new("&");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
+        $$->node_type = $1->node_type;
     }
 ;
 
@@ -696,15 +709,19 @@ igual_naoigual
     : maior_menor
     | igual_naoigual TK_OC_NE maior_menor
     {
+        check_type_compatibility($1->node_type, $3->node_type);
         $$ = asd_new("!=");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
+        $$->node_type = $1->node_type;
     }
     | igual_naoigual TK_OC_EQ maior_menor 
     {
+        check_type_compatibility($1->node_type, $3->node_type);
         $$ = asd_new("==");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
+        $$->node_type = $1->node_type;
     }
 ;
 
@@ -712,27 +729,35 @@ maior_menor
     : acumulacao
     | maior_menor TK_OC_GE acumulacao
     {
+        check_type_compatibility($1->node_type, $3->node_type);
         $$ = asd_new(">=");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
+        $$->node_type = $1->node_type;
     }
     | maior_menor TK_OC_LE acumulacao
         {
+        check_type_compatibility($1->node_type, $3->node_type);
         $$ = asd_new("<=");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
+        $$->node_type = $1->node_type;
     }
     | maior_menor '>' acumulacao
     {
+        check_type_compatibility($1->node_type, $3->node_type);
         $$ = asd_new(">");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
+        $$->node_type = $1->node_type;
     }
     | maior_menor '<' acumulacao
     {
+        check_type_compatibility($1->node_type, $3->node_type);
         $$ = asd_new("<");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
+        $$->node_type = $1->node_type;
     }
 ;
 
@@ -740,15 +765,19 @@ acumulacao
     : fator
     | acumulacao '+' fator
     {
+        check_type_compatibility($1->node_type, $3->node_type);
         $$ = asd_new("+");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
+        $$->node_type = $1->node_type;
     }
     | acumulacao '-' fator
-        {
+    {
+        check_type_compatibility($1->node_type, $3->node_type);
         $$ = asd_new("-");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
+        $$->node_type = $1->node_type;
     }
 ;
 
@@ -756,21 +785,27 @@ fator
     : termo
     | fator '*' termo
     {
+        check_type_compatibility($1->node_type, $3->node_type);
         $$ = asd_new("*");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
+        $$->node_type = $1->node_type;
     }
     | fator '/' termo
     {
+        check_type_compatibility($1->node_type, $3->node_type);
         $$ = asd_new("/");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
+        $$->node_type = $1->node_type;
     }
     | fator '%' termo
     {
+        check_type_compatibility($1->node_type, $3->node_type);
         $$ = asd_new("%");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
+        $$->node_type = $1->node_type;
     }
 ;
 
@@ -778,43 +813,68 @@ termo
     : operando
     | '(' expressao ')' {
         $$ = $2;
-
+        $$->node_type = $2->node_type;
     }
     | '+' termo
     {
         $$ = asd_new("+");
         asd_add_child($$, $2);
-
+        $$->node_type = $2->node_type;
     }
     | '-' termo
     {
         $$ = asd_new("-");
         asd_add_child($$, $2);
-
+        $$->node_type = $2->node_type;
     }
     | '!' termo
     {
         $$ = asd_new("!");
         asd_add_child($$, $2);
-
+        $$->node_type = $2->node_type;
     }
 ;
 
 operando
     : comando_simples_chamada_de_funcao
+    {
+        $$ = $1;
+        // preciso verificar qual o retorno da funcao
+    }
     | TK_ID
     {
         $$ = asd_new($1->value);
+
+        // aqui preciso verificar a tabela de simbolos
+        // ver se existe e pegar o tipo
+        int r = search_variable_on_stack(
+            stack_of_tables,
+            $1->value);
+
+        // not found
+        if (r == -1)
+        {
+            undeclared_error_message($1->value);
+            svalor_lexico_free($1);
+            free_stack_and_all_tables(stack_of_tables);
+            exit(ERR_UNDECLARED);
+        }
+
+        // otherwise we do have a type
+        printf("type returned: %d\n", r);
         svalor_lexico_free($1);
+        $$->node_type = r;
     }
     | TK_LI_FLOAT
     {
         $$ = asd_new($1->value);
         svalor_lexico_free($1);
+        $$->node_type = floatpoint;
     }
     | TK_LI_INT {
         $$ = asd_new($1->value);
         svalor_lexico_free($1);
+        $$->node_type = integer;
     }
 ;
 
@@ -898,4 +958,24 @@ void excess_args_error_message(char* token_name) {
     extern int yylineno;
     printf("Erro %d: funcao %s chamada com excesso de argumentos na linha %d\n", 
         ERR_EXCESS_ARGS, token_name, yylineno);
+}
+
+void wrong_type_error_message() {
+    extern int yylineno;
+    printf("Erro %d: tipos incompativeis na linha %d\n", 
+        ERR_WRONG_TYPE, 
+        yylineno);
+}
+
+
+// checks if the types are compatible
+int check_type_compatibility(int a_type, int b_type){
+    if (a_type != b_type)
+    {
+        // then it was already declared either
+        // as a variable or a function
+        free_stack_and_all_tables(stack_of_tables);
+        wrong_type_error_message();
+        exit(ERR_WRONG_TYPE);
+    }
 }
