@@ -278,7 +278,7 @@ corpo
     {
         // we created the scope from the function def
         // and can free after the body was parsed
-        free_current_table(stack_of_tables);
+        // free_current_table(stack_of_tables);
     }
 ;
 
@@ -318,9 +318,9 @@ cabecalho
             n_args
         );
 
-        // criar nova tabela de escopo
-        root_symbol_table* func_table = new_symbol_table();
-        register_table_to_stack(stack_of_tables, func_table);
+        // // criar nova tabela de escopo
+        // root_symbol_table* func_table = new_symbol_table();
+        // register_table_to_stack(stack_of_tables, func_table);
 
         n_args = -1;
     }
@@ -403,12 +403,27 @@ tipo_de_parametro
 ;
 
 bloco_de_comandos
-    : '[' sequencia_de_comandos_simples_possivelmente_vazia ']'  {
+    : '[' cria_escopo sequencia_de_comandos_simples_possivelmente_vazia destroi_escopo ']'  {
         // even if its null
-        $$ = $2;
+        $$ = $3;
     }
 ;
 
+
+cria_escopo
+    : %empty
+    {
+        root_symbol_table* func_table = new_symbol_table();
+        register_table_to_stack(stack_of_tables, func_table);
+    }
+;
+
+destroi_escopo
+    : %empty
+    {
+        free_current_table(stack_of_tables);
+    }
+;
 
 sequencia_de_comandos_simples_possivelmente_vazia
     : %empty
