@@ -568,7 +568,10 @@ comando_simples_chamada_de_funcao
                 svalor_lexico_free($1);
                 free_stack_and_all_tables(stack_of_tables);
                 exit(ERR_EXCESS_ARGS);
-            }                
+            } 
+            // TODO
+            // IMPLEMENT ELSE HERE
+            // o que acontece se essa funcao retornar um erro?
 
         } 
         else {

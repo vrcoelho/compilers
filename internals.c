@@ -531,7 +531,19 @@ int search_function_on_stack(
 }
 
 
-/// checking args
+/// checks if the num of args
+// in the function call is correct
+
+// sucess codes:
+// 1 ok
+// 5 it was a variable (not a function)
+// 11 received less args
+// 22 received more args
+
+// error codes:
+// -1 data not found
+// -2 null pointer
+// -3 empty current table
 
 int check_args_function_on_table(
     root_symbol_table* table,
@@ -549,8 +561,8 @@ int check_args_function_on_table(
     }
 
     if (table->header == NULL) {
-        // error we need a valid pointer
-        return -2;
+        // the table could be just empty...
+        return -3;
     }
     // comeco a procurar na tabela
     
@@ -606,7 +618,7 @@ int check_args_function_on_stack(
             curr_table,
             funcName,
             received_args);
-        if (r != -1)
+        if (r != -1 && r != -3)
             return r;
         i++;
         curr_table = curr_table->mother_table;
