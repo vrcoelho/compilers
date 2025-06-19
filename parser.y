@@ -37,6 +37,8 @@ extern stack_symbol_table* stack_of_tables;
 extern int n_args;
 extern int n_args_on_call;
 
+int flag_function_just_created_scope = 0;
+
 %}
 %debug
 
@@ -285,20 +287,24 @@ corpo
 
 cabecalho
     :
-    { 
+    nome_da_funcao
+    {
         n_args = 0;
+        root_symbol_table* func_table = new_symbol_table();
+        register_table_to_stack(stack_of_tables, func_table);
+        flag_function_just_created_scope = 1;
     }
-     nome_da_funcao TK_PR_RETURNS tipo_da_variavel
-     lista_de_parametros_que_pode_ser_vazia TK_PR_IS
+    TK_PR_RETURNS tipo_da_variavel
+    lista_de_parametros_que_pode_ser_vazia TK_PR_IS
     {
 
         // ATTENTION INCLUDING THAT RULE ON TOP,
-        // SHIFT ALL INDEXES BY ONE
+        // SHIFT ALL AFTER IT INDEXES BY ONE
 
-        // $$ = $1;
-        $$ = $2;
+        $$ = $1;
+        // $$ = $2;
 
-        int r = search_name_taken_on_stack(stack_of_tables, $2->label);
+        int r = search_name_taken_on_stack(stack_of_tables, $1->label);
         if (r == 1)
         {
             // then it was already declared either
@@ -308,19 +314,19 @@ cabecalho
             exit(ERR_DECLARED);
         }
 
+        // TODO check this points
+        // FIX na verdade aqui tenho que registrar na tabela acima dessa
         // temos que colocar a funcao na tabela
         register_function_to_tableofc(
-            stack_of_tables->current_table,
+            // this is enough?
+            // can the mother table be null? will the function handle this?
+            stack_of_tables->current_table->mother_table,
             // $1->label,
             // $3,
-            $2->label,
+            $1->label,
             $4,
             n_args
         );
-
-        // // criar nova tabela de escopo
-        // root_symbol_table* func_table = new_symbol_table();
-        // register_table_to_stack(stack_of_tables, func_table);
 
         n_args = -1;
     }
@@ -413,8 +419,13 @@ bloco_de_comandos
 cria_escopo
     : %empty
     {
-        root_symbol_table* func_table = new_symbol_table();
-        register_table_to_stack(stack_of_tables, func_table);
+        if (!flag_function_just_created_scope)
+        {
+            root_symbol_table* scope_table = new_symbol_table();
+            register_table_to_stack(stack_of_tables, scope_table);
+        }
+        else
+            flag_function_just_created_scope = 0;
     }
 ;
 
@@ -641,6 +652,11 @@ comando_simples_comando_de_retorno
             $2->node_type,
             $4
         );
+
+        // TODO how will we know the return of
+        // the current function? we need to go
+        // back on the pointers somehow
+
         $$ = asd_new("return");
         asd_add_child($$, $2);
     }
@@ -861,7 +877,6 @@ operando
         }
 
         // otherwise we do have a type
-        printf("type returned: %d\n", r);
         svalor_lexico_free($1);
         $$->node_type = r;
     }
