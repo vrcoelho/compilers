@@ -51,21 +51,6 @@ typedef struct stack_symbol_table_st {
 } stack_symbol_table;
 
 
-
-// probably should remove by now
-element_symbol_table* new_entry_variable(const char* name);
-
-element_symbol_table* new_entry_function(
-    const char* name, 
-    int nargs, 
-    type_of_element * argslist);
-
-void insert_to_table(
-    root_symbol_table* table_root,
-    element_symbol_table* element);
-
-
-
 void free_entry_st(element_symbol_table* st);
     
 void print_table(root_symbol_table* table_root);
