@@ -38,6 +38,7 @@ extern int n_args;
 extern int n_args_on_call;
 
 int flag_function_just_created_scope = 0;
+root_symbol_table* current_function_table = NULL;
 
 %}
 %debug
@@ -290,8 +291,9 @@ cabecalho
     nome_da_funcao
     {
         n_args = 0;
-        root_symbol_table* func_table = new_symbol_table();
-        register_table_to_stack(stack_of_tables, func_table);
+        current_function_table = new_symbol_table();
+        register_table_to_stack(
+            stack_of_tables, current_function_table);
         flag_function_just_created_scope = 1;
     }
     TK_PR_RETURNS tipo_da_variavel
@@ -314,6 +316,8 @@ cabecalho
             exit(ERR_DECLARED);
         }
 
+
+        // ESSA FUNCAO EH CHAMADA APENAS AQUI
         // TODO check this points
         // FIX na verdade aqui tenho que registrar na tabela acima dessa
         // temos que colocar a funcao na tabela
@@ -325,7 +329,8 @@ cabecalho
             // $3,
             $1->label,
             $4,
-            n_args
+            n_args,
+            current_function_table
         );
 
         n_args = -1;

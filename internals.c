@@ -55,7 +55,9 @@ void print_table(root_symbol_table* table_root)
         if (nextp->type_or_return == integer)
             strcpy(rtype, "int");
         else if(nextp->type_or_return == floatpoint)
-            strcpy(rtype, "float");            
+            strcpy(rtype, "float");     
+        else
+            strcpy(rtype, "???");
         
         if (nextp->type_of_element == function)
         {
@@ -64,6 +66,13 @@ void print_table(root_symbol_table* table_root)
                 nextp->name,
                 rtype,
                 nextp->n_args);
+
+            // como posso imprimir o numero de args
+            for(int i=0; i<nextp->n_args;i++){
+                printf("    arg %d: type %d\n",  
+                    i+1,
+                    nextp->parameters_list[i]);
+            }
         }
         else if(nextp->type_of_element == variable)
         {
@@ -185,11 +194,33 @@ void register_variable_to_tableofc(
     nextp->next->next = NULL; // just to make sure
 }
 
+
+type_of_element* get_parameters_from_table(
+    root_symbol_table* ftable_pointer,
+    int nargs){
+
+    if (ftable_pointer == NULL || nargs < 1 ) { 
+        // error because we need a valid pointer
+        return NULL;
+    }
+
+
+    type_of_element* args = malloc(nargs * sizeof(type_of_element));
+    element_symbol_table* nextp = ftable_pointer->header;
+    for(int i = 0; i < nargs; i++){
+        args[i] = nextp->type_or_return;
+        nextp = nextp->next;
+    }
+    return args;
+}
+
+
 // register functions to table
 element_symbol_table* new_entry_function2(
     const char* name, 
     int return_type,
-    int nargs) {
+    int nargs,
+    root_symbol_table* ftable_pointer) {
     element_symbol_table* p = NULL;
     p = calloc(1, sizeof(element_symbol_table));
     if (p != NULL) {
@@ -199,8 +230,23 @@ element_symbol_table* new_entry_function2(
 
         p->type_or_return = return_type;
         p->n_args = nargs;
+
+        p->ftable_pointer = ftable_pointer;
+
+
+
         // TODO INCLUDE PARAMETERS LIST IT HERE
-        p->parameters_list = NULL;
+
+        // call function to get this info from the
+        // pointed table
+        if (nargs > 0)
+        {
+            // TODO: check errors?
+            p->parameters_list = get_parameters_from_table(
+                p->ftable_pointer,
+                nargs
+            );
+        }
         
     }
     return p;
@@ -210,7 +256,8 @@ void register_function_to_tableofc(
     root_symbol_table* table_root,
     const char* name, 
     int return_type,
-    int nargs) {
+    int nargs,
+    root_symbol_table* ftable_pointer) {
 
     if (table_root == NULL ) { 
         // error because we need a valid pointer
@@ -218,16 +265,17 @@ void register_function_to_tableofc(
     }
 
     if (table_root->header == NULL ) { 
-        table_root->header = new_entry_function2(name, return_type, nargs);
+        table_root->header = new_entry_function2(name, return_type, nargs, ftable_pointer);
         return;
     }
+
     element_symbol_table* nextp = table_root->header;
     while (nextp->next != NULL)
     {
         nextp = nextp->next;
     }
     
-    nextp->next = new_entry_function2(name, return_type, nargs);
+    nextp->next = new_entry_function2(name, return_type, nargs, ftable_pointer);
     nextp->next->next = NULL; // just to make sure
 }
 

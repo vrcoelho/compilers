@@ -13,8 +13,20 @@ svalor_lexico_st *svalor_lexico_new(
 void svalor_lexico_free(svalor_lexico_st *v);
 
 
+
+
 typedef enum {variable = 55, function = 66} variable_or_function;
 typedef enum {integer = 77, floatpoint = 88} type_of_element;
+
+
+typedef struct root_symbol_table_st
+{
+    // points to the next symbol
+    struct element_symbol_table_st* header;
+    struct root_symbol_table_st* mother_table;
+    struct root_symbol_table_st* next_table;
+} root_symbol_table;
+
 
 typedef struct element_symbol_table_st
 {
@@ -31,18 +43,13 @@ typedef struct element_symbol_table_st
     // functions
     int n_args;
     type_of_element* parameters_list;
+    // the actual table with its scope
+    root_symbol_table* ftable_pointer;
 
     // points to the next symbol
     struct element_symbol_table_st* next;
 } element_symbol_table;
 
-typedef struct root_symbol_table_st
-{
-    // points to the next symbol
-    struct element_symbol_table_st* header;
-    struct root_symbol_table_st* mother_table;
-    struct root_symbol_table_st* next_table;
-} root_symbol_table;
 
 
 typedef struct stack_symbol_table_st {
@@ -71,6 +78,11 @@ void register_function_to_tableofc(
     root_symbol_table* table_root,
     const char* name, 
     int return_type,
+    int nargs,
+    root_symbol_table* ftable_pointer);
+
+type_of_element* get_parameters_from_table(
+    root_symbol_table* ftable_pointer,
     int nargs);
 
 stack_symbol_table* new_stack_of_tables();
