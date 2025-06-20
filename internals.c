@@ -521,7 +521,8 @@ int search_function_on_table(
             // the name matches
             // was it really a function?
             if (curr->type_of_element == function)
-                return 1; // found
+                // return 1; // found
+                return curr->type_or_return;
             else
                 return 5; // it was a variable
         }
@@ -554,7 +555,7 @@ int search_function_on_stack(
     while(curr_table != NULL) {
         // printf("Searching on table: %d\n", i);
         int r = search_function_on_table(curr_table, funcName);
-        if (r == 1 | r == 5)
+        if (r == 1 || r == 5 || r > 70)
             return r;
         i++;
         curr_table = curr_table->mother_table;

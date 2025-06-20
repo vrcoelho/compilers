@@ -37,6 +37,8 @@ extern stack_symbol_table* stack_of_tables;
 extern int n_args;
 
 int flag_function_just_created_scope = 0;
+
+char current_function_name[255] = "";
 root_symbol_table* current_function_table = NULL;
 
 %}
@@ -294,6 +296,10 @@ cabecalho
         register_table_to_stack(
             stack_of_tables, current_function_table);
         flag_function_just_created_scope = 1;
+
+        // saves the current function in a global variable
+        // so the return statement can check the type
+        snprintf(current_function_name, 255, "%s", $1->label);
     }
     TK_PR_RETURNS tipo_da_variavel
     lista_de_parametros_que_pode_ser_vazia TK_PR_IS
@@ -550,6 +556,7 @@ comando_simples_chamada_de_funcao
             stack_of_tables,
             $1->value
         );
+        // r code can mean the type
         // it was a variable!
         if (r == 5) {
             // we are calling a variable as a function
@@ -560,7 +567,15 @@ comando_simples_chamada_de_funcao
             svalor_lexico_free($1);
             free_stack_and_all_tables(stack_of_tables);
             exit(ERR_VARIABLE);
-        } else if (r == 1) {
+        }
+        else if (r == -1){
+            undeclared_error_message($1->value);
+            svalor_lexico_free($1);
+            free_stack_and_all_tables(stack_of_tables);
+            exit(ERR_UNDECLARED);
+        } 
+        else if (r > 66) 
+        {
             // deu tudo certo, eh uma funcao
             // se essa funcao existe
             // crio um registro na minha stack de argumentos
@@ -571,12 +586,6 @@ comando_simples_chamada_de_funcao
                     stack_of_tables,
                     $1->value
                 ));
-        }
-        else {
-            undeclared_error_message($1->value);
-            svalor_lexico_free($1);
-            free_stack_and_all_tables(stack_of_tables);
-            exit(ERR_UNDECLARED);
         }
 
     }  '(' lista_de_argumentos')' 
@@ -614,11 +623,18 @@ comando_simples_chamada_de_funcao
             free_stack_and_all_tables(stack_of_tables);
             exit(ERR_EXCESS_ARGS);
         } 
+        
 
-        svalor_lexico_free($1);
-        free(new_label);
+        // setar o tipo do nodo
+        // como o retorno da funcao
+        $$->node_type = get_function_entry_on_stack(
+                    stack_of_tables,
+                    $1->value
+                )->type_or_return;
 
         unstack_args_counter();
+        svalor_lexico_free($1);
+        free(new_label);
     }
 ;
 
@@ -690,14 +706,31 @@ comando_simples_comando_de_retorno
     : TK_PR_RETURN expressao TK_PR_AS tipo_da_variavel 
     {
 
+        // checa a compatibilidade entre a expressao
+        // e o tipo que estamos declarando em
+        // tipo_da_variavel
+
+        // TODO melhorar mensagem de erro 
+        // tipo incompativel entre expressao e
+        // tipo declarado em tipo_da_variavel
         check_type_compatibility(
             $2->node_type,
             $4
         );
 
-        // TODO how will we know the return of
-        // the current function? we need to go
-        // back on the pointers somehow
+        // checa a compatibilidade entre o tipo
+        // anterior e o retorno real da funcao
+        int t = search_function_on_stack(
+            stack_of_tables,
+            current_function_name
+        );
+
+        // TODO melhorar mensagem de erro 
+        // tipo incompativel c retorno da func
+        check_type_compatibility(
+            $2->node_type,
+            t
+        );
 
         $$ = asd_new("return");
         asd_add_child($$, $2);
