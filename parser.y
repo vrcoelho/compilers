@@ -898,6 +898,11 @@ operando
     {
         $$ = $1;
         // preciso verificar qual o retorno da funcao
+
+
+        // o que eu tenho que verificar aqui?
+        // ja vou verificar essa condicao quando 
+        // subir no parser
     }
     | TK_ID
     {
@@ -916,6 +921,17 @@ operando
             svalor_lexico_free($1);
             free_stack_and_all_tables(stack_of_tables);
             exit(ERR_UNDECLARED);
+        }
+
+        // deveria ser uma variavel, nao uma funcao
+        if (r == 3) {
+            // Enfim, caso o identificador dito função 
+            // seja utilizado como variável, deve-se lançar
+            // o erro ERR_FUNCTION
+            function_error_message($1->value);
+            svalor_lexico_free($1);
+            free_stack_and_all_tables(stack_of_tables);
+            exit(ERR_FUNCTION);
         }
 
         // otherwise we do have a type
