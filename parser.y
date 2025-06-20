@@ -35,7 +35,6 @@ extern asd_tree_t *arvore;
 
 extern stack_symbol_table* stack_of_tables;
 extern int n_args;
-extern int n_args_on_call;
 
 int flag_function_just_created_scope = 0;
 root_symbol_table* current_function_table = NULL;
@@ -540,7 +539,9 @@ comando_simples_comando_de_atribuicao
 // chamada de funcao
 comando_simples_chamada_de_funcao
     : 
-    TK_ID {n_args_on_call = 0;}  '(' lista_de_argumentos')' 
+    TK_ID {
+        create_and_stack_args_counter();
+    }  '(' lista_de_argumentos')' 
     {
         // ADDING THE NEW ACTION ON TOP
         // SHIFTS THE INDEX BY ONE AFTER THE FIRST
@@ -557,7 +558,7 @@ comando_simples_chamada_de_funcao
         if ($4 != NULL)
             asd_add_child($$, $4);
 
-        int received_args = n_args_on_call;
+        int received_args = get_current_args_current();
 
         // well we do need to check if the function exists
         int r = search_function_on_stack(
@@ -617,6 +618,8 @@ comando_simples_chamada_de_funcao
         }
         svalor_lexico_free($1);
         free(new_label);
+
+        unstack_args_counter();
     }
 ;
 
@@ -645,7 +648,7 @@ argumento
     {
         // to be able to count how many args we
         // passed to the function call
-        n_args_on_call++;
+        increase_current_args_counter();
     }
 ;
 
