@@ -133,6 +133,7 @@ void free_symbol_table_contents(root_symbol_table* table_root) {
 }
 
 void free_current_table(stack_symbol_table* stack ) {
+    printf("free_current_table called\n");
     if (stack == NULL ) { 
         // error because we need a valid pointer
         // printf("ERRO STACK ERA VAZIA");
@@ -298,6 +299,7 @@ void register_table_to_stack(
     stack_symbol_table* stack, 
     root_symbol_table* table    
 ) {
+    printf("register_table_to_stack called\n");
     if (stack == NULL) {
         // error we need a valid pointer
         return;
@@ -536,7 +538,7 @@ int check_args_function_on_table(
         // error we need a valid pointer
         return -2;
     }
-
+    
     if (table->header == NULL) {
         // the table could be just empty...
         return -3;
@@ -676,4 +678,95 @@ int search_name_taken_on_stack(
         curr_table = curr_table->mother_table;
     }
     return -1;
+}
+
+
+// arguments functions
+
+args_counter* pt_top_counter_args= NULL;
+args_counter* pt_current_counter_args= NULL;
+
+
+args_counter* new_argscounter(){
+    args_counter* argument_counter_pointer = NULL;
+    argument_counter_pointer = calloc(1, sizeof(args_counter));
+    argument_counter_pointer->args_passed = 0;
+    argument_counter_pointer->next = NULL;
+    return argument_counter_pointer;
+}
+
+void create_and_stack_args_counter() {
+    if (pt_top_counter_args == NULL) { 
+        pt_current_counter_args = new_argscounter();
+        pt_top_counter_args = pt_current_counter_args;
+        return;
+    }
+
+    args_counter* newargs = new_argscounter();
+
+    pt_current_counter_args->next = newargs;
+    pt_current_counter_args = newargs;
+}
+
+void unstack_args_counter() {
+    if (pt_top_counter_args == NULL) { 
+        return;
+    }
+
+    // pega penultimo
+    args_counter* pu = pt_top_counter_args;
+
+    // se eu sou o ultimo
+    if (pu->next == NULL)
+    {
+        // free pu
+        free(pu);
+        pt_current_counter_args = NULL;
+        pt_top_counter_args = NULL;
+    }
+    else{
+        while(pu->next != NULL && pu->next->next != NULL)
+        {
+            pu = pu->next;
+        }
+
+        // tem que free o ultimo (pu->next)
+        free(pu->next);
+
+        pu->next = NULL;
+        pt_current_counter_args = pu;
+    }
+}
+
+void print_args_counter() {
+    if (pt_top_counter_args == NULL)
+    {
+        printf("empty\n");
+        return;
+    }
+        
+    printf("=====\n");
+    args_counter* current = pt_top_counter_args;
+    while(current!=NULL)
+    {
+        printf("args %d\n", current->args_passed);
+        current = current->next;
+    }
+    printf("=====\n");
+}
+
+// seria o mesmo que so acessar e add pelo ponteiro
+void increase_current_args_counter() {
+    if (pt_current_counter_args == NULL) { 
+        // ERROR
+        return;
+    }
+    pt_current_counter_args->args_passed++;
+}
+
+int get_current_args_current() {
+    if (pt_current_counter_args == NULL) { 
+        return -1;
+    }
+    return pt_current_counter_args->args_passed;
 }

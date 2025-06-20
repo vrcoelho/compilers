@@ -19,6 +19,12 @@ typedef enum {variable = 55, function = 66} variable_or_function;
 typedef enum {integer = 77, floatpoint = 88} type_of_element;
 
 
+typedef struct args_counter_st
+{
+    int args_passed;
+    struct args_counter_st* next;
+} args_counter;
+
 typedef struct root_symbol_table_st
 {
     // points to the next symbol
@@ -149,3 +155,12 @@ int search_name_taken_on_stack(
 
 
 int check_type_compatibility(int a_type, int b_type);
+
+
+// arguments functions
+args_counter* new_argscounter();
+void create_and_stack_args_counter();
+void unstack_args_counter();
+void increase_current_args_counter();
+int get_current_args_current();
+void print_args_counter();

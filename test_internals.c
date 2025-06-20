@@ -98,5 +98,26 @@ int main() {
 
     free(stack);
 
+
+    // testes para a criacao do
+    // contador de argumentos
+    int i = 5;
+    for(int j = 0; j < i; j++)
+    {
+        create_and_stack_args_counter();
+        print_args_counter();
+    }
+
+    i=3;
+    for(int j = 0; j < i; j++)
+    {
+        unstack_args_counter();
+        print_args_counter();
+    }
+
+    increase_current_args_counter();
+    increase_current_args_counter();
+    printf("%d\n", get_current_args_current() );
+
     return 0;
 }
