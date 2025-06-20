@@ -1,4 +1,5 @@
-CFLAGS += -fsanitize=address
+CFLAGS += -fsanitize=address 
+CFLAGS += -g
 # CFLAGS += -DDEBUG_MESSAGES
 
 # === usado pelo professor ===
