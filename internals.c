@@ -404,7 +404,7 @@ int search_variable_on_stack(
     int i = 1;
     while(curr_table != NULL) {
         int r = search_variable_on_table(curr_table, varname);
-        if (r == 1 | r == 3 | r > 70)
+        if (r == 1 || r == 3 || r > 70)
             // integer = 77, floatpoint = 88
             return r;
         i++;
