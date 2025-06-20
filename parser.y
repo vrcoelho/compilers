@@ -173,16 +173,18 @@ elemento
 variavel
     : declaracao_da_variavel 
     {
-        asd_free($1);
-        $$ = NULL;
+        // asd_free($1);
+        // $$ = NULL;
+        $$ = $1;
     }
 ;
 
 variavel_inicializavel
     : declaracao_da_variavel
     {
-        asd_free($1);
-        $$ = NULL;
+        // asd_free($1);
+        // $$ = NULL;
+        $$ = $1;
     }
     | declaracao_da_variavel  variavel_inicializacao
     {
@@ -226,6 +228,8 @@ declaracao_da_variavel
             $4);     
 
         svalor_lexico_free($2);
+
+        $$->node_type = $4;
     }
 ;
 
@@ -283,6 +287,7 @@ corpo
         // we created the scope from the function def
         // and can free after the body was parsed
         // free_current_table(stack_of_tables);
+        $$ = $1;
     }
 ;
 
@@ -538,6 +543,8 @@ comando_simples_comando_de_atribuicao
         // r = type from the searched (and found!) variable
         check_type_compatibility(r, $3->node_type);
 
+        $$->node_type = r;
+
         svalor_lexico_free($1);
     }
 ;
@@ -734,6 +741,7 @@ comando_simples_comando_de_retorno
 
         $$ = asd_new("return");
         asd_add_child($$, $2);
+        $$->node_type = t;
     }
 ;
 
@@ -751,6 +759,7 @@ construcao_condicional
         asd_add_child($$, $3);
         if ($5 != NULL)
             asd_add_child($$, $5);
+        $$->node_type = $3->node_type;
     }
     | TK_PR_IF '(' expressao ')' bloco_de_comandos TK_PR_ELSE bloco_de_comandos
     {
@@ -760,6 +769,42 @@ construcao_condicional
             asd_add_child($$, $5);
         if ($7 != NULL)
             asd_add_child($$, $7);
+
+
+        ////////////////////////////////////////
+        // TODO CLARIFICAR DUVIDA
+        // PERGUNTAR POIS O MEU ENTENDIMENTO DA ESPECIFICACAO 
+        // EH A SEGUINTE
+
+        // > No comando if especificamente, os tipos de dados do bloco do 
+        // if e do bloco do else devem ser compatíveis (quando este está 
+        // presente). 
+
+        // if ($5 == NULL || $7 == NULL)
+        // {
+        //     // both should be empty
+        //     free_stack_and_all_tables(stack_of_tables);
+        //     wrong_type_error_message();
+        //     exit(ERR_WRONG_TYPE);
+        // }
+        ////////////////////////////////////////
+
+        // SE apenas a segunda for nula
+        // porque nao vou ter um tipo pra testar
+        if ($5 != NULL || $7 == NULL)
+        {
+            free_stack_and_all_tables(stack_of_tables);
+            wrong_type_error_message();
+            exit(ERR_WRONG_TYPE);
+        }
+
+
+        check_type_compatibility(
+            $3->node_type, // type from expressao
+            $7->node_type  // type from else command block
+        );
+
+        $$->node_type = $3->node_type;
     }
 ;
 
@@ -770,6 +815,7 @@ construcao_iterativa
         asd_add_child($$, $3);
         if ($5 != NULL)
             asd_add_child($$, $5);
+        $$->node_type = $3->node_type;
     }
 ;
 
