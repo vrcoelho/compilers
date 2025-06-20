@@ -89,6 +89,22 @@ int main() {
 
 
 
+    
+
+    // teste funcoes de acesso
+    element_symbol_table* e = get_function_entry_on_stack(
+        stack,
+        newfuncname5
+    );
+
+    printf("arg: %d\n", e->parameters_list[1]);
+    
+
+
+
+
+
+
     // free resources
     free_symbol_table_contents(table);
     free(table);    

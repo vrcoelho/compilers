@@ -441,6 +441,59 @@ int free_stack_and_all_tables(
 }
 
 
+element_symbol_table* get_function_entry_on_table(
+    root_symbol_table* table,
+    const char* funcName
+) {
+     // error we need a valid pointer
+    if (table == NULL)        
+        return NULL;
+
+    if (funcName == NULL) 
+        return NULL;
+
+    if (table->header == NULL) 
+        return NULL;
+    
+    element_symbol_table* curr = table->header;
+    while(curr != NULL)
+    {
+        if (strcmp(funcName, curr->name) == 0)
+        {
+            return curr;
+        }
+
+        curr = curr->next;
+    }
+
+    // not found
+    return NULL;
+}
+
+element_symbol_table* get_function_entry_on_stack(
+    stack_symbol_table* stack_of_tables,
+    const char* funcName
+) {
+    if (stack_of_tables == NULL) 
+        return NULL;
+    
+    if (stack_of_tables->current_table == NULL) 
+        return NULL;
+    
+    root_symbol_table* curr_table = stack_of_tables->current_table;
+
+    int i = 1;
+    while(curr_table != NULL) {
+        // printf("Searching on table: %d\n", i);
+        element_symbol_table* r = 
+            get_function_entry_on_table(curr_table, funcName);
+        if (r != NULL)
+            return r;
+        i++;
+        curr_table = curr_table->mother_table;
+    }
+    return NULL;
+}
 
 int search_function_on_table(
     root_symbol_table* table,
@@ -574,6 +627,7 @@ int check_args_function_on_table(
 }
 
 
+// TODO delete
 int check_args_function_on_stack(
     stack_symbol_table* stack_of_tables,
     const char* funcName,
@@ -687,22 +741,23 @@ args_counter* pt_top_counter_args= NULL;
 args_counter* pt_current_counter_args= NULL;
 
 
-args_counter* new_argscounter(){
+args_counter* new_argscounter(element_symbol_table* e){
     args_counter* argument_counter_pointer = NULL;
     argument_counter_pointer = calloc(1, sizeof(args_counter));
     argument_counter_pointer->args_passed = 0;
     argument_counter_pointer->next = NULL;
+    argument_counter_pointer->func_entry = e;
     return argument_counter_pointer;
 }
 
-void create_and_stack_args_counter() {
+void create_and_stack_args_counter(element_symbol_table* e) {
     if (pt_top_counter_args == NULL) { 
-        pt_current_counter_args = new_argscounter();
+        pt_current_counter_args = new_argscounter(e);
         pt_top_counter_args = pt_current_counter_args;
         return;
     }
 
-    args_counter* newargs = new_argscounter();
+    args_counter* newargs = new_argscounter(e);
 
     pt_current_counter_args->next = newargs;
     pt_current_counter_args = newargs;
@@ -769,4 +824,11 @@ int get_current_args_current() {
         return -1;
     }
     return pt_current_counter_args->args_passed;
+}
+
+element_symbol_table* get_current_args_func_entry() {
+    if (pt_current_counter_args == NULL) { 
+        return NULL;
+    }
+    return pt_current_counter_args->func_entry;
 }

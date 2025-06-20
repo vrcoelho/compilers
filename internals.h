@@ -18,13 +18,6 @@ void svalor_lexico_free(svalor_lexico_st *v);
 typedef enum {variable = 55, function = 66} variable_or_function;
 typedef enum {integer = 77, floatpoint = 88} type_of_element;
 
-
-typedef struct args_counter_st
-{
-    int args_passed;
-    struct args_counter_st* next;
-} args_counter;
-
 typedef struct root_symbol_table_st
 {
     // points to the next symbol
@@ -56,6 +49,12 @@ typedef struct element_symbol_table_st
     struct element_symbol_table_st* next;
 } element_symbol_table;
 
+typedef struct args_counter_st
+{
+    int args_passed;
+    element_symbol_table* func_entry;
+    struct args_counter_st* next;
+} args_counter;
 
 
 typedef struct stack_symbol_table_st {
@@ -159,8 +158,14 @@ int check_type_compatibility(int a_type, int b_type);
 
 // arguments functions
 args_counter* new_argscounter();
-void create_and_stack_args_counter();
+void create_and_stack_args_counter(element_symbol_table* e);
 void unstack_args_counter();
 void increase_current_args_counter();
 int get_current_args_current();
 void print_args_counter();
+
+element_symbol_table* get_function_entry_on_stack(
+    stack_symbol_table* stack_of_tables,
+    const char* funcName
+) ;
+element_symbol_table* get_current_args_func_entry();

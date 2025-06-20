@@ -540,7 +540,45 @@ comando_simples_comando_de_atribuicao
 comando_simples_chamada_de_funcao
     : 
     TK_ID {
-        create_and_stack_args_counter();
+        // in this structure
+        // i also need to register the function entry pointer
+        // because I will need to access the types on each
+        // args call
+
+        // well we do need to check if the function exists
+        int r = search_function_on_stack(
+            stack_of_tables,
+            $1->value
+        );
+        // it was a variable!
+        if (r == 5) {
+            // we are calling a variable as a function
+            // Caso o identificador dito variável seja 
+            // usado como uma função, deve-se lançar o
+            // erro ERR_VARIABLE
+            variable_error_message($1->value);
+            svalor_lexico_free($1);
+            free_stack_and_all_tables(stack_of_tables);
+            exit(ERR_VARIABLE);
+        } else if (r == 1) {
+            // deu tudo certo, eh uma funcao
+            // se essa funcao existe
+            // crio um registro na minha stack de argumentos
+            // com um ponteiro para a entry da funcao
+            // para possibilitar a checagem de tipos
+            create_and_stack_args_counter(
+                get_function_entry_on_stack(
+                    stack_of_tables,
+                    $1->value
+                ));
+        }
+        else {
+            undeclared_error_message($1->value);
+            svalor_lexico_free($1);
+            free_stack_and_all_tables(stack_of_tables);
+            exit(ERR_UNDECLARED);
+        }
+
     }  '(' lista_de_argumentos')' 
     {
         // ADDING THE NEW ACTION ON TOP
@@ -557,65 +595,26 @@ comando_simples_chamada_de_funcao
         //     asd_add_child($$, $3);
         if ($4 != NULL)
             asd_add_child($$, $4);
-
+        
+        element_symbol_table* funcentry = get_current_args_func_entry();
         int received_args = get_current_args_current();
+        int expected_args = funcentry->n_args;
 
-        // well we do need to check if the function exists
-        int r = search_function_on_stack(
-            stack_of_tables,
-            $1->value
-        );
-        // it was a variable!
-        if (r == 5) {
-            // we are calling a variable as a function
-            // Caso o identificador dito variável seja 
-            // usado como uma função, deve-se lançar o
-            // erro ERR_VARIABLE
-
-
-            variable_error_message($1->value);
-            svalor_lexico_free($1);
-            free_stack_and_all_tables(stack_of_tables);
-
-            // tenho q dar free em todas as tabelas q ja aloquei
-
-            exit(ERR_VARIABLE);
-
-        }
-        else if (r == 1)
+        if (received_args < expected_args) // too few
         {
-            // we did found and it was indeed a function
-            // but we now must check the number of args
-            int argsok = check_args_function_on_stack(
-                stack_of_tables,
-                $1->value,
-                received_args
-            );
-
-            if (argsok == 11) // too few
-            {
-                missing_args_error_message($1->value);
-                svalor_lexico_free($1);
-                free_stack_and_all_tables(stack_of_tables);
-                exit(ERR_MISSING_ARGS);
-            } else if (argsok == 22) // too much
-            {
-                excess_args_error_message($1->value);
-                svalor_lexico_free($1);
-                free_stack_and_all_tables(stack_of_tables);
-                exit(ERR_EXCESS_ARGS);
-            } 
-            // TODO
-            // IMPLEMENT ELSE HERE
-            // o que acontece se essa funcao retornar um erro?
-
-        } 
-        else {
-            undeclared_error_message($1->value);
+            missing_args_error_message($1->value);
             svalor_lexico_free($1);
             free_stack_and_all_tables(stack_of_tables);
-            exit(ERR_UNDECLARED);
-        }
+            exit(ERR_MISSING_ARGS);
+        } else if (received_args > expected_args) // too much
+        // TODO: do I need this? Will this code ever be reached?
+        {
+            excess_args_error_message($1->value);
+            svalor_lexico_free($1);
+            free_stack_and_all_tables(stack_of_tables);
+            exit(ERR_EXCESS_ARGS);
+        } 
+
         svalor_lexico_free($1);
         free(new_label);
 
@@ -646,9 +645,44 @@ lista_de_argumentos_separados_por_virgula
 argumento
     : expressao
     {
+        int current_index = get_current_args_current();
+        // increase after so we can get the index value
+        // for the arrays
+
         // to be able to count how many args we
         // passed to the function call
         increase_current_args_counter();
+
+        // so here we need to actually check the type
+        // it could be an expression
+        // or a variable
+        element_symbol_table* avaliated_func_entry = get_current_args_func_entry();
+
+        if (current_index + 1 > avaliated_func_entry->n_args )
+        {
+            // todo fix this
+            excess_args_error_message("naosei");
+            free_stack_and_all_tables(stack_of_tables);
+            exit(ERR_EXCESS_ARGS);
+        }
+
+        int expected_type = avaliated_func_entry->parameters_list[current_index];
+
+        int node_type = $1->node_type;
+
+        // aqui preciso colocar o erro
+        if (node_type != expected_type){
+            // TODO CREATE ERROR MESSAGE
+            printf("wrong type args\n");
+            free_stack_and_all_tables(stack_of_tables);
+            exit(ERR_WRONG_TYPE_ARGS);
+        }
+
+
+        // lembrando que ela tambem pode ser uma
+        // comando_simples_chamada_de_funcao
+        // nested
+
     }
 ;
 
