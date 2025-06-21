@@ -174,8 +174,6 @@ elemento
 variavel
     : declaracao_da_variavel 
     {
-        // asd_free($1);
-        // $$ = NULL;
         $$ = $1;
     }
 ;
@@ -183,8 +181,6 @@ variavel
 variavel_inicializavel
     : declaracao_da_variavel
     {
-        // asd_free($1);
-        // $$ = NULL;
         $$ = $1;
     }
     | declaracao_da_variavel  variavel_inicializacao
@@ -206,14 +202,12 @@ declaracao_da_variavel
 
         // colocando apenas o nome
         $$ = asd_new($2->value);
-        // free o nome da variavel, no label
         
 
         // actually I need to check if variable name does not
         // already exists
         // i do not need to check all the places, 
         // only the current scope
-
         int r = search_name_taken_on_table(stack_of_tables->current_table, $2->value);
         if (r == 1)
         {
@@ -287,9 +281,6 @@ funcao
 corpo
     : bloco_de_comandos
     {
-        // we created the scope from the function def
-        // and can free after the body was parsed
-        // free_current_table(stack_of_tables);
         $$ = $1;
     }
 ;
@@ -307,7 +298,6 @@ cabecalho
 
         // saves the current function name in a global variable
         // so the return statement can check the type
-
         // do i need to do this here?
         snprintf(current_function_name, 255, "%s", $1->label);
     }
@@ -317,7 +307,6 @@ cabecalho
 
         // ATTENTION INCLUDING THAT RULE ON TOP,
         // SHIFT ALL AFTER IT INDEXES BY ONE
-
         $$ = $1;
         // $$ = $2;
 
@@ -327,7 +316,6 @@ cabecalho
             // then it was already declared either
             // as a variable or a function
             free_stack_and_all_tables(stack_of_tables);
-            printf("ERR_DECLARED\n");
             exit(ERR_DECLARED);
         }
 
@@ -562,11 +550,6 @@ comando_simples_comando_de_atribuicao
 comando_simples_chamada_de_funcao
     : 
     TK_ID {
-        // in this structure
-        // i also need to register the function entry pointer
-        // because I will need to access the types on each
-        // args call
-
         // well we do need to check if the function exists
         int r = search_function_on_stack(
             stack_of_tables,
@@ -701,18 +684,12 @@ argumento
 
         int node_type = $1->node_type;
 
-        // aqui preciso colocar o erro
+
         if (node_type != expected_type){
             wrong_type_args_error_message();
             free_stack_and_all_tables(stack_of_tables);
             exit(ERR_WRONG_TYPE_ARGS);
         }
-
-
-        // lembrando que ela tambem pode ser uma
-        // comando_simples_chamada_de_funcao
-        // nested
-
     }
 ;
 
@@ -984,9 +961,6 @@ operando
     {
         $$ = $1;
         // preciso verificar qual o retorno da funcao
-
-
-        // o que eu tenho que verificar aqui?
         // ja vou verificar essa condicao quando 
         // subir no parser
     }
