@@ -210,11 +210,13 @@ declaracao_da_variavel
 
         // actually I need to check if variable name does not
         // already exists
-        int r = search_name_taken_on_stack(stack_of_tables, $2->value);
+        // i do not need to check all the places, 
+        // only the current scope
+
+        int r = search_name_taken_on_table(stack_of_tables->current_table, $2->value);
         if (r == 1)
         {
-            // then it was already declared either
-            // as a variable or a function
+            // then it was already declared
             free_stack_and_all_tables(stack_of_tables);
             declared_error_message($2->value);
             svalor_lexico_free($2);
@@ -298,12 +300,14 @@ cabecalho
     {
         n_args = 0;
         current_function_table = new_symbol_table();
-        register_table_to_stack(
-            stack_of_tables, current_function_table);
+        // register_table_to_stack(
+            // stack_of_tables, current_function_table);
         flag_function_just_created_scope = 1;
 
-        // saves the current function in a global variable
+        // saves the current function name in a global variable
         // so the return statement can check the type
+
+        // do i need to do this here?
         snprintf(current_function_name, 255, "%s", $1->label);
     }
     TK_PR_RETURNS tipo_da_variavel
@@ -328,13 +332,8 @@ cabecalho
 
 
         // ESSA FUNCAO EH CHAMADA APENAS AQUI
-        // TODO check this points
-        // FIX na verdade aqui tenho que registrar na tabela acima dessa
-        // temos que colocar a funcao na tabela
         register_function_to_tableofc(
-            // this is enough?
-            // can the mother table be null? will the function handle this?
-            stack_of_tables->current_table->mother_table,
+            stack_of_tables->current_table,
             // $1->label,
             // $3,
             $1->label,
@@ -342,6 +341,14 @@ cabecalho
             n_args,
             current_function_table
         );
+
+
+        //apenas aqui `troco o contexto` e registro a
+        // tabela da funcao (que ja contem suas variaveis declaradas)
+        // na pilha de tabelas
+        // a partir daqui stack_of_tables->current_table == current_function_table
+        register_table_to_stack(
+            stack_of_tables, current_function_table);
 
         n_args = -1;
     }
@@ -379,31 +386,29 @@ decl
     : TK_ID TK_PR_AS tipo_de_parametro 
     {
 
-        // aqui eu tambem deveria declarar o parametro
-        // e checar se ele ja existe
+        // current_function_table -> estou usando esse pointeiro
+        // pois ainda nao `troquei o contexto`, apenas farei isso
+        // quando registrar a funcao no final do cabecalho
 
-        // TODO REFACTOR
-        // copiado da parte da declaracao_da_variavel
-         // actually I need to check if variable name does not
-        // already exists
-        int r = search_name_taken_on_stack(stack_of_tables, $1->value);
+        // na verdade, a variavel so nao precisa existir 
+        // no escopo da funcao atual
+        // e inclusive ela poderia ter o mesmo nome da funcao 
+        int r = search_name_taken_on_table(current_function_table, $1->value);
         if (r == 1)
         {
-            // then it was already declared either
-            // as a variable or a function
+            // then it was already declared
             free_stack_and_all_tables(stack_of_tables);
             declared_error_message($1->value);
             svalor_lexico_free($1);
             exit(ERR_DECLARED);
         }
 
-        // if not used yet, we register to the current table
+        // if not used yet, we register to the
+        // function table
         register_variable_to_tableofc(
-            stack_of_tables->current_table, 
+            current_function_table, 
             $1->value, 
             $3);
-        // copiado da parte da declaracao_da_variavel
-        // TODO REFACTOR
 
         // contagem do numero de args
         n_args++;

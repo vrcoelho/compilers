@@ -669,6 +669,11 @@ int check_args_function_on_stack(
 
 
 
+// code error
+
+// -2 -> EMPTY POINTERS
+// -5 -> table was empty
+
 // to find if something was already declared
 int search_name_taken_on_table(
     root_symbol_table* table,
@@ -686,7 +691,7 @@ int search_name_taken_on_table(
 
     if (table->header == NULL) {
         // error we need a valid pointer
-        return -2;
+        return -5;
     }
     // comeco a procurar na tabela
     element_symbol_table* curr = table->header;
