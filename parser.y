@@ -703,8 +703,7 @@ argumento
 
         // aqui preciso colocar o erro
         if (node_type != expected_type){
-            // TODO CREATE ERROR MESSAGE
-            printf("wrong type args\n");
+            wrong_type_args_error_message();
             free_stack_and_all_tables(stack_of_tables);
             exit(ERR_WRONG_TYPE_ARGS);
         }

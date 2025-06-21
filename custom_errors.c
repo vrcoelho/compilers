@@ -55,6 +55,13 @@ void wrong_type_error_message() {
         yylineno);
 }
 
+void wrong_type_args_error_message() {
+    extern int yylineno;
+    printf("Erro %d: argumentos incompativeis na linha %d\n", 
+        ERR_WRONG_TYPE_ARGS, 
+        yylineno);
+}
+
 void get_error_name_from_code(char* nametype, int error_code)
 {
     switch (error_code) {

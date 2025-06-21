@@ -6,7 +6,7 @@ void function_error_message(char* token_name);
 
 void missing_args_error_message(char* token_name);
 void excess_args_error_message();
-
+void wrong_type_args_error_message();
 void wrong_type_error_message();
 
 void generic_error(int error_type,
