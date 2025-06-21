@@ -634,7 +634,7 @@ comando_simples_chamada_de_funcao
         } else if (received_args > expected_args) // too much
         // TODO: do I need this? Will this code ever be reached?
         {
-            excess_args_error_message($1->value);
+            excess_args_error_message();
             svalor_lexico_free($1);
             free_stack_and_all_tables(stack_of_tables);
             exit(ERR_EXCESS_ARGS);
@@ -692,8 +692,7 @@ argumento
 
         if (current_index + 1 > avaliated_func_entry->n_args )
         {
-            // todo fix this
-            excess_args_error_message("naosei");
+            excess_args_error_message();
             free_stack_and_all_tables(stack_of_tables);
             exit(ERR_EXCESS_ARGS);
         }

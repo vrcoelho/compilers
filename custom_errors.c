@@ -42,10 +42,10 @@ void missing_args_error_message(char* token_name) {
         ERR_MISSING_ARGS, token_name, yylineno);
 }
 
-void excess_args_error_message(char* token_name) {
+void excess_args_error_message() {
     extern int yylineno;
-    printf("Erro %d: funcao %s chamada com excesso de argumentos na linha %d\n", 
-        ERR_EXCESS_ARGS, token_name, yylineno);
+    printf("Erro %d: funcao chamada com excesso de argumentos na linha %d\n", 
+        ERR_EXCESS_ARGS, yylineno);
 }
 
 void wrong_type_error_message() {
