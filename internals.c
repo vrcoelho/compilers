@@ -42,7 +42,7 @@ void free_entry_st(element_symbol_table* st) {
     }
     // check if its null?
     free(st->name);
-    // free(st->parameters_list);
+    free(st->parameters_list);
 }
 
 void print_table(root_symbol_table* table_root)
