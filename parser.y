@@ -547,7 +547,10 @@ comando_simples_comando_de_atribuicao
 
         // now we must check if the expression is compatible
         // r = type from the searched (and found!) variable
-        check_type_compatibility(r, $3->node_type);
+        check_compatible_attribution(
+            r, 
+            $3->node_type);
+
 
         $$->node_type = r;
 
@@ -726,7 +729,7 @@ comando_simples_comando_de_retorno
         // TODO melhorar mensagem de erro 
         // tipo incompativel entre expressao e
         // tipo declarado em tipo_da_variavel
-        check_type_compatibility(
+        check_return_passed_and_declared_in_expression(
             $2->node_type,
             $4
         );
@@ -740,9 +743,9 @@ comando_simples_comando_de_retorno
 
         // TODO melhorar mensagem de erro 
         // tipo incompativel c retorno da func
-        check_type_compatibility(
-            $2->node_type,
-            t
+        check_return_passed_and_declared_in_function(
+            t,
+            $2->node_type            
         );
 
         $$ = asd_new("return");
@@ -805,7 +808,7 @@ construcao_condicional
         }
 
 
-        check_type_compatibility(
+        check_compatible_if_blocks(
             $3->node_type, // type from expressao
             $7->node_type  // type from else command block
         );
@@ -829,7 +832,7 @@ expressao
     : and
     | expressao '|' and
     {
-        check_type_compatibility($1->node_type, $3->node_type);
+        check_type_compatibility_operations($1->node_type, $3->node_type);
         $$ = asd_new("|");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
@@ -840,7 +843,7 @@ expressao
 and
     : igual_naoigual
     | and '&' igual_naoigual {
-        check_type_compatibility($1->node_type, $3->node_type);
+        check_type_compatibility_operations($1->node_type, $3->node_type);
         $$ = asd_new("&");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
@@ -852,7 +855,7 @@ igual_naoigual
     : maior_menor
     | igual_naoigual TK_OC_NE maior_menor
     {
-        check_type_compatibility($1->node_type, $3->node_type);
+        check_type_compatibility_operations($1->node_type, $3->node_type);
         $$ = asd_new("!=");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
@@ -860,7 +863,7 @@ igual_naoigual
     }
     | igual_naoigual TK_OC_EQ maior_menor 
     {
-        check_type_compatibility($1->node_type, $3->node_type);
+        check_type_compatibility_operations($1->node_type, $3->node_type);
         $$ = asd_new("==");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
@@ -872,7 +875,7 @@ maior_menor
     : acumulacao
     | maior_menor TK_OC_GE acumulacao
     {
-        check_type_compatibility($1->node_type, $3->node_type);
+        check_type_compatibility_operations($1->node_type, $3->node_type);
         $$ = asd_new(">=");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
@@ -880,7 +883,7 @@ maior_menor
     }
     | maior_menor TK_OC_LE acumulacao
         {
-        check_type_compatibility($1->node_type, $3->node_type);
+        check_type_compatibility_operations($1->node_type, $3->node_type);
         $$ = asd_new("<=");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
@@ -888,7 +891,7 @@ maior_menor
     }
     | maior_menor '>' acumulacao
     {
-        check_type_compatibility($1->node_type, $3->node_type);
+        check_type_compatibility_operations($1->node_type, $3->node_type);
         $$ = asd_new(">");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
@@ -896,7 +899,7 @@ maior_menor
     }
     | maior_menor '<' acumulacao
     {
-        check_type_compatibility($1->node_type, $3->node_type);
+        check_type_compatibility_operations($1->node_type, $3->node_type);
         $$ = asd_new("<");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
@@ -908,7 +911,7 @@ acumulacao
     : fator
     | acumulacao '+' fator
     {
-        check_type_compatibility($1->node_type, $3->node_type);
+        check_type_compatibility_operations($1->node_type, $3->node_type);
         $$ = asd_new("+");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
@@ -916,7 +919,7 @@ acumulacao
     }
     | acumulacao '-' fator
     {
-        check_type_compatibility($1->node_type, $3->node_type);
+        check_type_compatibility_operations($1->node_type, $3->node_type);
         $$ = asd_new("-");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
@@ -928,7 +931,7 @@ fator
     : termo
     | fator '*' termo
     {
-        check_type_compatibility($1->node_type, $3->node_type);
+        check_type_compatibility_operations($1->node_type, $3->node_type);
         $$ = asd_new("*");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
@@ -936,7 +939,7 @@ fator
     }
     | fator '/' termo
     {
-        check_type_compatibility($1->node_type, $3->node_type);
+        check_type_compatibility_operations($1->node_type, $3->node_type);
         $$ = asd_new("/");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
@@ -944,7 +947,7 @@ fator
     }
     | fator '%' termo
     {
-        check_type_compatibility($1->node_type, $3->node_type);
+        check_type_compatibility_operations($1->node_type, $3->node_type);
         $$ = asd_new("%");
         asd_add_child($$, $1);
         asd_add_child($$, $3);
@@ -1075,16 +1078,126 @@ void yyerror (char const *s) {
         );
 }
 
+// ERROR FUNCTIONS
+// TODO: REFACTOR AND MOVE TO A SEPARATE FILE
+// DID NOT DO IT YET BECAUSE I AM USING A GLOBAL VARIABLE
 
-
-// checks if the types are compatible
-int check_type_compatibility(int a_type, int b_type){
+// formas que essa funcao eh chamada
+// atribuicao
+// quando uma variavel = igual alguma coisa
+void check_compatible_attribution(int a_type, int b_type) {
     if (a_type != b_type)
     {
-        // then it was already declared either
-        // as a variable or a function
+    
+        char a_type_name[MAX_SIZE_SHORT_STRING];
+        get_type_name_from_code(a_type_name,a_type);
+
+        char b_type_name[MAX_SIZE_SHORT_STRING];
+        get_type_name_from_code(b_type_name,b_type);
+
+        char error_message[255] = "";
+        snprintf(error_message, 255,  
+                "Variavel esperava %s e recebeu %s",
+                a_type_name,
+                b_type_name);
+        generic_error(ERR_WRONG_TYPE, error_message);
+
         free_stack_and_all_tables(stack_of_tables);
-        wrong_type_error_message();
+        exit(ERR_WRONG_TYPE);
+    }
+}
+
+// retorno
+// expressao nao eh <oq foi passado>
+void check_return_passed_and_declared_in_expression(int a_type, int b_type) {
+    if (a_type != b_type)
+    {
+    
+        char a_type_name[MAX_SIZE_SHORT_STRING];
+        get_type_name_from_code(a_type_name,a_type);
+
+        char b_type_name[MAX_SIZE_SHORT_STRING];
+        get_type_name_from_code(b_type_name,b_type);
+
+        char error_message[255] = "";
+        snprintf(error_message, 255,  
+                "return <%s> as <%s> -> tipos deveriam ser compativeis",
+                a_type_name,
+                b_type_name);
+        generic_error(ERR_WRONG_TYPE, error_message);
+
+        free_stack_and_all_tables(stack_of_tables);
+        exit(ERR_WRONG_TYPE);
+    }
+}
+// retorno imcompativel com o retorno da funcao s
+void check_return_passed_and_declared_in_function(int a_type, int b_type) {
+    if (a_type != b_type)
+    {
+    
+        char a_type_name[MAX_SIZE_SHORT_STRING];
+        get_type_name_from_code(a_type_name,a_type);
+
+        char b_type_name[MAX_SIZE_SHORT_STRING];
+        get_type_name_from_code(b_type_name,b_type);
+
+        char error_message[255] = "";
+        snprintf(error_message, 255,  
+                "Funcao esperava tipo %s mas recebeu %s",
+                a_type_name,
+                b_type_name);
+        generic_error(ERR_WRONG_TYPE, error_message);
+
+        free_stack_and_all_tables(stack_of_tables);
+        exit(ERR_WRONG_TYPE);
+    }
+}
+
+
+// if
+// blocos do comando if and else incompativeis
+void check_compatible_if_blocks(int a_type, int b_type) {
+    if (a_type != b_type)
+    {
+    
+        char a_type_name[MAX_SIZE_SHORT_STRING];
+        get_type_name_from_code(a_type_name,a_type);
+
+        char b_type_name[MAX_SIZE_SHORT_STRING];
+        get_type_name_from_code(b_type_name,b_type);
+
+        char error_message[255] = "";
+        snprintf(error_message, 255,  
+                "Expressao do if (%s) e bloco else (%s) sao de tipos incompativeis",
+                a_type_name,
+                b_type_name);
+        generic_error(ERR_WRONG_TYPE, error_message);
+
+        free_stack_and_all_tables(stack_of_tables);
+        exit(ERR_WRONG_TYPE);
+    }
+}
+
+// expressoes
+int check_type_compatibility_operations(int a_type, int b_type){
+    if (a_type != b_type)
+    {
+
+        char a_type_name[MAX_SIZE_SHORT_STRING];
+        get_type_name_from_code(a_type_name,a_type);
+
+        char b_type_name[MAX_SIZE_SHORT_STRING];
+        get_type_name_from_code(b_type_name,b_type);
+
+        char error_message[255] = "";
+        snprintf(error_message, 255,  
+                "Operacao nao suportada entre %s e %s",
+                a_type_name,
+                b_type_name);
+        generic_error(ERR_WRONG_TYPE, error_message);
+
+        // gracefully shutdown
+        free_stack_and_all_tables(stack_of_tables);
         exit(ERR_WRONG_TYPE);
     }
 }

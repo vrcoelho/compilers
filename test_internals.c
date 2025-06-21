@@ -1,6 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "internals.h"
+#include "custom_errors.h"
+
+int yylineno = 99;
 
 int main() {
     // como vai ser o teste?
@@ -115,25 +118,55 @@ int main() {
     free(stack);
 
 
-    // testes para a criacao do
-    // contador de argumentos
-    int i = 5;
-    for(int j = 0; j < i; j++)
-    {
-        create_and_stack_args_counter();
-        print_args_counter();
-    }
+    // // testes para a criacao do
+    // // contador de argumentos
+    // int i = 5;
+    // for(int j = 0; j < i; j++)
+    // {
+    //     create_and_stack_args_counter();
+    //     print_args_counter();
+    // }
 
-    i=3;
-    for(int j = 0; j < i; j++)
-    {
-        unstack_args_counter();
-        print_args_counter();
-    }
+    // i=3;
+    // for(int j = 0; j < i; j++)
+    // {
+    //     unstack_args_counter();
+    //     print_args_counter();
+    // }
 
-    increase_current_args_counter();
-    increase_current_args_counter();
-    printf("%d\n", get_current_args_current() );
+    // increase_current_args_counter();
+    // increase_current_args_counter();
+    // printf("%d\n", get_current_args_current() );
+
+
+
+    char nametype[MAX_SIZE_SHORT_STRING];
+    get_type_name_from_code(nametype, integer);
+    printf("%s\n", nametype );
+
+    get_type_name_from_code(nametype, floatpoint);
+    printf("%s\n", nametype );
+
+    get_type_name_from_code(nametype, integer);
+    printf("%s\n", nametype );
+
+    get_type_name_from_code(nametype, floatpoint);
+    printf("%s\n", nametype );
+
+    get_type_name_from_code(nametype, 33);
+    printf("%s\n", nametype );
+
+    get_type_name_from_code(nametype, floatpoint);
+    printf("%s\n", nametype );
+
+
+    get_error_name_from_code(nametype, 10);
+    printf("%s\n", nametype );
+
+
+    wrong_type_error_message();
+
+    generic_error(10, "");
 
     return 0;
 }

@@ -153,8 +153,9 @@ int search_name_taken_on_stack(
 );
 
 
-int check_type_compatibility(int a_type, int b_type);
 
+int check_type_compatibility_operations(int a_type,
+ int b_type);
 
 // arguments functions
 args_counter* new_argscounter();
